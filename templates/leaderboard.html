@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Code Duel — Рейтинг</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0f0f1a;
+            color: #ffffff;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+            background: #1e1e2e;
+            border-bottom: 1px solid #333;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            background: linear-gradient(90deg, #ff6b6b, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav { display: flex; gap: 16px; }
+
+        .nav a {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 15px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .nav a:hover { background: #2a2a3e; color: white; }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 32px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            text-align: left;
+            padding: 12px 16px;
+            color: #888;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #333;
+        }
+
+        .table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #222;
+            font-size: 15px;
+        }
+
+        .table tr:hover td { background: #1a1a2e; }
+
+        .rank {
+            font-weight: bold;
+            color: #888;
+            width: 40px;
+        }
+
+        .rank-1 { color: #ffd700; font-size: 20px; }
+        .rank-2 { color: #c0c0c0; font-size: 18px; }
+        .rank-3 { color: #cd7f32; font-size: 18px; }
+
+        .username a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .username a:hover { color: #a855f7; }
+
+        .rating {
+            color: #a855f7;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .wins { color: #4ade80; }
+        .losses { color: #f87171; }
+
+        .winrate {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px;
+            color: #555;
+            font-size: 18px;
+        }
+
+        .btn-play {
+            display: inline-block;
+            margin-top: 32px;
+            padding: 12px 28px;
+            background: linear-gradient(90deg, #ff6b6b, #a855f7);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <a class="logo" href="/">⚔️ Code Duel</a>
+    <div class="nav">
+        <a href="/">🏠 Главная</a>
+        <a href="/leaderboard">🏆 Рейтинг</a>
+    </div>
+</div>
+
+<div class="container">
+    <h1>🏆 Таблица лидеров</h1>
+    <p class="subtitle">Топ игроков по рейтингу</p>
+
+    {% if players %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Игрок</th>
+                <th>Рейтинг</th>
+                <th>Победы</th>
+                <th>Поражения</th>
+                <th>Винрейт</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player in players %}
+            <tr>
+                <td class="rank">
+                    {% if loop.index == 1 %}🥇
+                    {% elif loop.index == 2 %}🥈
+                    {% elif loop.index == 3 %}🥉
+                    {% else %}{{ loop.index }}
+                    {% endif %}
+                </td>
+                <td class="username">
+                    <a href="/profile/{{ player.username }}">{{ player.username }}</a>
+                </td>
+                <td class="rating">{{ player.rating }}</td>
+                <td class="wins">{{ player.wins }}W</td>
+                <td class="losses">{{ player.losses }}L</td>
+                <td class="winrate">{{ player.winrate }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+        Пока никто не играл 😔<br>Будь первым!
+    </div>
+    {% endif %}
+
+    <a class="btn-play" href="/">⚔️ Сыграть дуэль</a>
+</div>
+
+</body>
+</html>
