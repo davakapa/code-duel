@@ -125,15 +125,10 @@
             display: none;
         }
 
-        .divider {
-            color: #444;
-            margin: 16px 0;
-            font-size: 14px;
-        }
+        .divider { color: #444; margin: 16px 0; font-size: 14px; }
 
         #error { color: #ff6b6b; margin-top: 10px; font-size: 14px; }
 
-        /* Поиск соперника */
         #searching-box {
             display: none;
             background: #1e1e2e;
@@ -141,14 +136,9 @@
             border-radius: 12px;
             padding: 24px;
             margin-bottom: 12px;
-            text-align: center;
         }
 
-        .searching-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
+        .searching-title { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
 
         .searching-dots {
             font-size: 28px;
@@ -157,30 +147,16 @@
             animation: pulse 1.5s infinite;
         }
 
-        .searching-timer {
-            color: #888;
-            font-size: 14px;
-            margin-top: 8px;
-        }
+        .searching-timer { color: #888; font-size: 14px; margin-top: 8px; }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
         }
 
-        .bottom-links {
-            margin-top: 24px;
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-        }
+        .bottom-links { margin-top: 24px; display: flex; justify-content: center; gap: 24px; }
 
-        .bottom-links a {
-            color: #a855f7;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
+        .bottom-links a { color: #a855f7; text-decoration: none; font-size: 14px; }
         .bottom-links a:hover { text-decoration: underline; }
     </style>
 </head>
@@ -200,7 +176,6 @@
 
         <input type="text" id="username" placeholder="Твой никнейм" maxlength="20"/>
 
-        <!-- Поиск соперника -->
         <div id="searching-box">
             <div class="searching-title">🔍 Ищем соперника...</div>
             <div class="searching-dots">● ● ●</div>
@@ -238,13 +213,11 @@
         return document.getElementById('username').value.trim();
     }
 
-    // Найти соперника
     document.getElementById('btn-find').addEventListener('click', function() {
         const username = getUsername();
         if (!username) return showError('Введи никнейм!');
         localStorage.setItem('username', username);
 
-        // Показываем анимацию поиска
         document.getElementById('searching-box').style.display = 'block';
         document.getElementById('btn-find').style.display = 'none';
         document.getElementById('btn-cancel').style.display = 'block';
@@ -259,10 +232,8 @@
         socket.emit('find_match', { username: username });
     });
 
-    // Отменить поиск
     document.getElementById('btn-cancel').addEventListener('click', function() {
-        const username = getUsername();
-        socket.emit('cancel_search', { username: username });
+        socket.emit('cancel_search', { username: getUsername() });
         stopSearch();
     });
 
@@ -273,7 +244,6 @@
         document.getElementById('btn-cancel').style.display = 'none';
     }
 
-    // Создать комнату с другом
     document.getElementById('btn-create').addEventListener('click', function() {
         const username = getUsername();
         if (!username) return showError('Введи никнейм!');
@@ -281,7 +251,6 @@
         socket.emit('create_room', { username: username });
     });
 
-    // Войти в комнату
     document.getElementById('btn-join').addEventListener('click', function() {
         const username = getUsername();
         const room_id = document.getElementById('room_code').value.trim();
@@ -293,11 +262,11 @@
         window.location.href = '/duel/' + room_id;
     });
 
-    // Соперник найден!
     socket.on('match_found', function(data) {
         stopSearch();
         localStorage.setItem('room_id', data.room_id);
         localStorage.setItem('should_join', 'true');
+        localStorage.setItem('from_matchmaking', 'true');
         window.location.href = '/duel/' + data.room_id;
     });
 

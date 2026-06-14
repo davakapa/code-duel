@@ -42,12 +42,7 @@
 
         .timer.danger { color: #ff6b6b; }
 
-        .players {
-            display: flex;
-            gap: 20px;
-            font-size: 14px;
-            color: #aaa;
-        }
+        .players { display: flex; gap: 20px; font-size: 14px; color: #aaa; }
 
         .player-tag {
             padding: 4px 12px;
@@ -58,11 +53,7 @@
         .player-tag.me { border: 1px solid #a855f7; color: white; }
         .player-tag.done { border: 1px solid #4ade80; color: #4ade80; }
 
-        .main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
+        .main { display: flex; flex: 1; overflow: hidden; }
 
         .task-panel {
             width: 380px;
@@ -72,18 +63,9 @@
             overflow-y: auto;
         }
 
-        .task-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            color: #fff;
-        }
+        .task-title { font-size: 20px; font-weight: bold; margin-bottom: 12px; }
 
-        .task-desc {
-            color: #ccc;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
+        .task-desc { color: #ccc; line-height: 1.6; margin-bottom: 20px; }
 
         .tests-title {
             font-size: 13px;
@@ -103,11 +85,7 @@
             color: #ccc;
         }
 
-        .editor-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
+        .editor-panel { flex: 1; display: flex; flex-direction: column; }
 
         textarea {
             flex: 1;
@@ -162,11 +140,7 @@
             z-index: 100;
         }
 
-        .waiting-title {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 12px;
-        }
+        .waiting-title { font-size: 28px; font-weight: bold; margin-bottom: 12px; }
 
         .room-code-box {
             background: #1e1e2e;
@@ -177,11 +151,7 @@
             text-align: center;
         }
 
-        .room-code-label {
-            font-size: 13px;
-            color: #888;
-            margin-bottom: 6px;
-        }
+        .room-code-label { font-size: 13px; color: #888; margin-bottom: 6px; }
 
         .room-code {
             font-size: 36px;
@@ -202,11 +172,7 @@
             font-size: 14px;
         }
 
-        .waiting-hint {
-            color: #666;
-            font-size: 14px;
-            margin-top: 8px;
-        }
+        .waiting-hint { color: #666; font-size: 14px; margin-top: 8px; }
 
         #result-overlay {
             position: fixed;
@@ -266,7 +232,6 @@
         <div class="tests-title">Примеры</div>
         <div id="test-cases"></div>
     </div>
-
     <div class="editor-panel">
         <textarea id="code-editor" placeholder="# Пиши код здесь..."></textarea>
         <div class="bottom-panel">
@@ -282,19 +247,20 @@
     const roomId = "{{ room_id }}";
     const username = localStorage.getItem('username');
     const isSecondPlayer = localStorage.getItem('should_join') === 'true';
+    const fromMatchmaking = localStorage.getItem('from_matchmaking') === 'true';
     let timerInterval = null;
     let secondsLeft = 300;
 
-    // Если второй игрок — сразу скрываем оверлей ожидания
     if (isSecondPlayer) {
         document.getElementById('waiting-overlay').style.display = 'none';
         localStorage.removeItem('should_join');
+        if (fromMatchmaking) {
+            localStorage.removeItem('from_matchmaking');
+        }
     } else {
-        // Первый игрок — показываем код комнаты
         document.getElementById('display-room-code').textContent = roomId;
     }
 
-    // Кнопки
     document.getElementById('copy-btn').addEventListener('click', function() {
         navigator.clipboard.writeText(roomId);
         this.textContent = '✅ Скопировано!';
@@ -313,15 +279,19 @@
         window.location.href = '/';
     });
 
-    // Когда сокет подключился
     socket.on('connect', function() {
-    if (isSecondPlayer) {
-        socket.emit('join_room_event', { username: username, room_id: roomId });
-    } else {
-        // Первый игрок переподключается к своей комнате
-        socket.emit('rejoin_room', { username: username, room_id: roomId });
-    }
-});
+        if (isSecondPlayer) {
+            if (fromMatchmaking) {
+                // Пришли через автопоиск — комната уже создана
+                socket.emit('rejoin_room', { username: username, room_id: roomId });
+            } else {
+                // Пришли по коду комнаты
+                socket.emit('join_room_event', { username: username, room_id: roomId });
+            }
+        } else {
+            socket.emit('rejoin_room', { username: username, room_id: roomId });
+        }
+    });
 
     function startTimer() {
         timerInterval = setInterval(function() {
@@ -347,9 +317,7 @@
             const args = Array.isArray(t.input) ? t.input.join(', ') : Object.values(t.input).join(', ');
             tc.innerHTML += '<div class="test-case"><b>Тест ' + (i+1) + ':</b> solution(' + args + ') → ' + t.output + '</div>';
         });
-
-        // Стартовый код
-        const args = task.tests[0].input.length === 2 ? 'a, b' : 'a, b, c';
+        const args = task.tests[0].input.length === 2 ? 'a, b' : task.tests[0].input.length === 3 ? 'a, b, c' : 'n';
         document.getElementById('code-editor').value = 'def solution(' + args + '):\n    # пиши здесь\n    pass';
     }
 
@@ -361,12 +329,10 @@
         document.getElementById('result-overlay').style.display = 'flex';
     }
 
-    // События от сервера
     socket.on('duel_start', function(data) {
         document.getElementById('waiting-overlay').style.display = 'none';
         showTask(data.task);
         startTimer();
-
         const pd = document.getElementById('players-display');
         pd.innerHTML = '';
         data.players.forEach(function(p) {
@@ -393,9 +359,7 @@
         }
     });
 
-    socket.on('error', function(data) {
-        alert(data.message);
-    });
+    socket.on('error', function(data) { alert(data.message); });
 </script>
 </body>
 </html>
