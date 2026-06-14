@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, session
 from flask_socketio import SocketIO, emit, join_room
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import uuid
 import random
@@ -13,11 +14,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# --- Модели базы данных ---
+# --- Модели ---
 
 class Player(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
     rating = db.Column(db.Integer, default=1000)
     wins = db.Column(db.Integer, default=0)
     losses = db.Column(db.Integer, default=0)
@@ -40,11 +42,9 @@ class Match(db.Model):
 with app.app_context():
     db.create_all()
 
-# --- Активные комнаты и очередь ---
 rooms = {}
 matchmaking_queue = []
 
-# --- Задачи ---
 TASKS = [
     {
         "id": 1,
@@ -193,10 +193,54 @@ TASKS = [
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('index.html', username=session['username'])
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        if not username or not password:
+            return render_template('register.html', error='Заполни все поля!')
+        if len(username) < 3:
+            return render_template('register.html', error='Никнейм минимум 3 символа!')
+        if len(password) < 4:
+            return render_template('register.html', error='Пароль минимум 4 символа!')
+        if Player.query.filter_by(username=username).first():
+            return render_template('register.html', error='Этот никнейм уже занят!')
+        player = Player(
+            username=username,
+            password=generate_password_hash(password)
+        )
+        db.session.add(player)
+        db.session.commit()
+        session['username'] = username
+        return redirect(url_for('index'))
+    return render_template('register.html', error=None)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        player = Player.query.filter_by(username=username).first()
+        if not player or not check_password_hash(player.password, password):
+            return render_template('login.html', error='Неверный никнейм или пароль!')
+        session['username'] = username
+        return redirect(url_for('index'))
+    return render_template('login.html', error=None)
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('login'))
 
 @app.route('/duel/<room_id>')
 def duel(room_id):
+    if 'username' not in session:
+        return redirect(url_for('login'))
     return render_template('duel.html', room_id=room_id)
 
 @app.route('/leaderboard')
@@ -216,25 +260,18 @@ def profile(username):
 
 # --- Вспомогательные функции ---
 
-def get_or_create_player(username):
-    player = Player.query.filter_by(username=username).first()
-    if not player:
-        player = Player(username=username)
-        db.session.add(player)
-        db.session.commit()
-    return player
-
 def update_ratings(winner_name, loser_name, task_title):
     with app.app_context():
-        winner = get_or_create_player(winner_name)
-        loser = get_or_create_player(loser_name)
-        winner.rating += 25
-        winner.wins += 1
-        loser.rating = max(0, loser.rating - 25)
-        loser.losses += 1
-        match = Match(winner=winner_name, loser=loser_name, task_title=task_title)
-        db.session.add(match)
-        db.session.commit()
+        winner = Player.query.filter_by(username=winner_name).first()
+        loser = Player.query.filter_by(username=loser_name).first()
+        if winner and loser:
+            winner.rating += 25
+            winner.wins += 1
+            loser.rating = max(0, loser.rating - 25)
+            loser.losses += 1
+            match = Match(winner=winner_name, loser=loser_name, task_title=task_title)
+            db.session.add(match)
+            db.session.commit()
 
 # --- Сокет события ---
 
@@ -242,37 +279,24 @@ def update_ratings(winner_name, loser_name, task_title):
 def find_match(data):
     username = data['username']
     global matchmaking_queue
-
-    # Убираем если уже в очереди
     matchmaking_queue = [p for p in matchmaking_queue if p['username'] != username]
 
     if matchmaking_queue:
         opponent = matchmaking_queue.pop(0)
-
         room_id = str(uuid.uuid4())[:8]
         task = random.choice(TASKS)
         rooms[room_id] = {
             'players': [opponent['username'], username],
             'task': task,
             'finished': [],
-            'creator_sid': opponent['sid']
         }
-
         join_room(room_id)
-
-        # Сохраняем игроков
-        get_or_create_player(opponent['username'])
-        get_or_create_player(username)
-
-        # Отправляем обоим
         emit('match_found', {'room_id': room_id}, to=opponent['sid'])
         emit('match_found', {'room_id': room_id})
-
         socketio.emit('duel_start', {
             'task': task,
             'players': [opponent['username'], username]
         }, to=room_id)
-
     else:
         matchmaking_queue.append({'username': username, 'sid': request.sid})
         emit('searching')
@@ -294,7 +318,6 @@ def create_room(data):
         'creator_sid': request.sid
     }
     join_room(room_id)
-    get_or_create_player(data['username'])
     emit('room_created', {'room_id': room_id})
 
 @socketio.on('rejoin_room')
@@ -304,8 +327,8 @@ def rejoin_room(data):
     if room_id not in rooms:
         emit('error', {'message': 'Комната не найдена!'})
         return
-    room = rooms[room_id]
     join_room(room_id)
+    room = rooms[room_id]
     if len(room['players']) == 2:
         emit('duel_start', {
             'task': room['task'],
@@ -325,7 +348,6 @@ def join_room_event(data):
         return
     room['players'].append(username)
     join_room(room_id)
-    get_or_create_player(username)
     emit('duel_start', {
         'task': room['task'],
         'players': room['players']
@@ -336,14 +358,11 @@ def submit_code(data):
     room_id = data['room_id']
     code = data['code']
     username = data['username']
-
     if room_id not in rooms:
         emit('error', {'message': 'Комната не найдена!'})
         return
-
     room = rooms[room_id]
     task = room['task']
-
     results = []
     passed = 0
     for test in task['tests']:
@@ -358,20 +377,14 @@ def submit_code(data):
                 results.append(f"❌ (ожидалось {test['output']}, получили {exec_globals['result']})")
         except Exception as e:
             results.append(f"❌ Ошибка: {str(e)}")
-
     all_passed = passed == len(task['tests'])
-
     if all_passed and username not in room['finished']:
         room['finished'].append(username)
         place = len(room['finished'])
         if place == 1 and len(room['players']) == 2:
             other = [p for p in room['players'] if p != username][0]
             update_ratings(username, other, task['title'])
-        emit('opponent_finished', {
-            'username': username,
-            'place': place
-        }, to=room_id)
-
+        emit('opponent_finished', {'username': username, 'place': place}, to=room_id)
     emit('test_results', {
         'results': results,
         'passed': passed,

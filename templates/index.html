@@ -33,6 +33,8 @@
             -webkit-text-fill-color: transparent;
         }
 
+        .nav { display: flex; gap: 16px; align-items: center; }
+
         .nav a {
             color: #aaa;
             text-decoration: none;
@@ -43,6 +45,17 @@
         }
 
         .nav a:hover { background: #2a2a3e; color: white; }
+
+        .nav .username {
+            color: #a855f7;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .nav .logout {
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+        }
 
         .main {
             flex: 1;
@@ -70,6 +83,18 @@
             margin-bottom: 32px;
             font-size: 16px;
         }
+
+        .welcome {
+            background: #1e1e2e;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 12px 20px;
+            margin-bottom: 24px;
+            color: #ccc;
+            font-size: 15px;
+        }
+
+        .welcome span { color: #a855f7; font-weight: bold; }
 
         input {
             width: 100%;
@@ -165,7 +190,10 @@
 <div class="header">
     <div class="logo">⚔️ Code Duel</div>
     <div class="nav">
+        <span class="username">👤 {{ username }}</span>
+        <a href="/profile/{{ username }}">Профиль</a>
         <a href="/leaderboard">🏆 Рейтинг</a>
+        <a href="/logout" class="logout">Выйти</a>
     </div>
 </div>
 
@@ -174,7 +202,7 @@
         <h1>⚔️ Code Duel</h1>
         <p class="subtitle">Сразись в программировании с реальным соперником</p>
 
-        <input type="text" id="username" placeholder="Твой никнейм" maxlength="20"/>
+        <div class="welcome">Привет, <span>{{ username }}</span>! Готов к дуэли?</div>
 
         <div id="searching-box">
             <div class="searching-title">🔍 Ищем соперника...</div>
@@ -196,12 +224,14 @@
 
         <div class="bottom-links">
             <a href="/leaderboard">🏆 Таблица лидеров</a>
+            <a href="/profile/{{ username }}">👤 Мой профиль</a>
         </div>
     </div>
 </div>
 
 <script>
     const socket = io();
+    const username = "{{ username }}";
     let searchTimer = null;
     let searchSeconds = 0;
 
@@ -209,15 +239,7 @@
         document.getElementById('error').textContent = msg;
     }
 
-    function getUsername() {
-        return document.getElementById('username').value.trim();
-    }
-
     document.getElementById('btn-find').addEventListener('click', function() {
-        const username = getUsername();
-        if (!username) return showError('Введи никнейм!');
-        localStorage.setItem('username', username);
-
         document.getElementById('searching-box').style.display = 'block';
         document.getElementById('btn-find').style.display = 'none';
         document.getElementById('btn-cancel').style.display = 'block';
@@ -233,7 +255,7 @@
     });
 
     document.getElementById('btn-cancel').addEventListener('click', function() {
-        socket.emit('cancel_search', { username: getUsername() });
+        socket.emit('cancel_search', { username: username });
         stopSearch();
     });
 
@@ -245,39 +267,28 @@
     }
 
     document.getElementById('btn-create').addEventListener('click', function() {
-        const username = getUsername();
-        if (!username) return showError('Введи никнейм!');
-        localStorage.setItem('username', username);
         socket.emit('create_room', { username: username });
     });
 
     document.getElementById('btn-join').addEventListener('click', function() {
-        const username = getUsername();
         const room_id = document.getElementById('room_code').value.trim();
-        if (!username) return showError('Введи никнейм!');
         if (!room_id) return showError('Введи код комнаты!');
-        localStorage.setItem('username', username);
-        localStorage.setItem('room_id', room_id);
         localStorage.setItem('should_join', 'true');
         window.location.href = '/duel/' + room_id;
     });
 
     socket.on('match_found', function(data) {
         stopSearch();
-        localStorage.setItem('room_id', data.room_id);
         localStorage.setItem('should_join', 'true');
         localStorage.setItem('from_matchmaking', 'true');
         window.location.href = '/duel/' + data.room_id;
     });
 
     socket.on('room_created', function(data) {
-        localStorage.setItem('room_id', data.room_id);
         window.location.href = '/duel/' + data.room_id;
     });
 
-    socket.on('search_cancelled', function() {
-        stopSearch();
-    });
+    socket.on('search_cancelled', function() { stopSearch(); });
 
     socket.on('error', function(data) {
         showError(data.message);
