@@ -37,12 +37,12 @@ class Match(db.Model):
     task_title = db.Column(db.String(100))
     played_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Создаём таблицы
 with app.app_context():
     db.create_all()
 
-# --- Активные комнаты ---
+# --- Активные комнаты и очередь ---
 rooms = {}
+matchmaking_queue = []
 
 # --- Задачи ---
 TASKS = [
@@ -228,18 +228,60 @@ def update_ratings(winner_name, loser_name, task_title):
     with app.app_context():
         winner = get_or_create_player(winner_name)
         loser = get_or_create_player(loser_name)
-
-        # Простая система рейтинга — победитель получает 25, проигравший теряет 25
         winner.rating += 25
         winner.wins += 1
         loser.rating = max(0, loser.rating - 25)
         loser.losses += 1
-
         match = Match(winner=winner_name, loser=loser_name, task_title=task_title)
         db.session.add(match)
         db.session.commit()
 
 # --- Сокет события ---
+
+@socketio.on('find_match')
+def find_match(data):
+    username = data['username']
+    global matchmaking_queue
+
+    # Убираем если уже в очереди
+    matchmaking_queue = [p for p in matchmaking_queue if p['username'] != username]
+
+    if matchmaking_queue:
+        opponent = matchmaking_queue.pop(0)
+
+        room_id = str(uuid.uuid4())[:8]
+        task = random.choice(TASKS)
+        rooms[room_id] = {
+            'players': [opponent['username'], username],
+            'task': task,
+            'finished': [],
+            'creator_sid': opponent['sid']
+        }
+
+        join_room(room_id)
+
+        # Сохраняем игроков
+        get_or_create_player(opponent['username'])
+        get_or_create_player(username)
+
+        # Отправляем обоим
+        emit('match_found', {'room_id': room_id}, to=opponent['sid'])
+        emit('match_found', {'room_id': room_id})
+
+        socketio.emit('duel_start', {
+            'task': task,
+            'players': [opponent['username'], username]
+        }, to=room_id)
+
+    else:
+        matchmaking_queue.append({'username': username, 'sid': request.sid})
+        emit('searching')
+
+@socketio.on('cancel_search')
+def cancel_search(data):
+    global matchmaking_queue
+    matchmaking_queue = [p for p in matchmaking_queue if p['username'] != data['username']]
+    emit('search_cancelled')
 
 @socketio.on('create_room')
 def create_room(data):
@@ -322,12 +364,9 @@ def submit_code(data):
     if all_passed and username not in room['finished']:
         room['finished'].append(username)
         place = len(room['finished'])
-
-        # Если оба игрока и первый финишировал — обновляем рейтинги
         if place == 1 and len(room['players']) == 2:
             other = [p for p in room['players'] if p != username][0]
             update_ratings(username, other, task['title'])
-
         emit('opponent_finished', {
             'username': username,
             'place': place

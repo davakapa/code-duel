@@ -33,8 +33,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .nav { display: flex; gap: 16px; }
-
         .nav a {
             color: #aaa;
             text-decoration: none;
@@ -55,7 +53,7 @@
 
         .container {
             text-align: center;
-            width: 400px;
+            width: 420px;
             padding: 20px;
         }
 
@@ -69,7 +67,7 @@
 
         .subtitle {
             color: #888;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
             font-size: 16px;
         }
 
@@ -101,15 +99,30 @@
 
         button:hover { opacity: 0.85; }
 
-        .btn-create {
+        .btn-find {
             background: linear-gradient(90deg, #ff6b6b, #a855f7);
             color: white;
+            font-size: 18px;
+            padding: 16px;
+        }
+
+        .btn-create {
+            background: #1e1e2e;
+            color: white;
+            border: 1px solid #a855f7;
         }
 
         .btn-join {
             background: #1e1e2e;
             color: white;
-            border: 1px solid #a855f7;
+            border: 1px solid #555;
+        }
+
+        .btn-cancel {
+            background: #2a2a3e;
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+            display: none;
         }
 
         .divider {
@@ -118,14 +131,45 @@
             font-size: 14px;
         }
 
-        #error {
-            color: #ff6b6b;
-            margin-top: 10px;
+        #error { color: #ff6b6b; margin-top: 10px; font-size: 14px; }
+
+        /* Поиск соперника */
+        #searching-box {
+            display: none;
+            background: #1e1e2e;
+            border: 1px solid #a855f7;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .searching-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .searching-dots {
+            font-size: 28px;
+            letter-spacing: 6px;
+            color: #a855f7;
+            animation: pulse 1.5s infinite;
+        }
+
+        .searching-timer {
+            color: #888;
             font-size: 14px;
+            margin-top: 8px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
 
         .bottom-links {
-            margin-top: 28px;
+            margin-top: 24px;
             display: flex;
             justify-content: center;
             gap: 24px;
@@ -152,15 +196,26 @@
 <div class="main">
     <div class="container">
         <h1>⚔️ Code Duel</h1>
-        <p class="subtitle">Сразись с другом в программировании</p>
+        <p class="subtitle">Сразись в программировании с реальным соперником</p>
 
         <input type="text" id="username" placeholder="Твой никнейм" maxlength="20"/>
-        <button class="btn-create" id="btn-create">🚀 Создать дуэль</button>
 
-        <div class="divider">— или войди в существующую —</div>
+        <!-- Поиск соперника -->
+        <div id="searching-box">
+            <div class="searching-title">🔍 Ищем соперника...</div>
+            <div class="searching-dots">● ● ●</div>
+            <div class="searching-timer" id="search-timer">0 сек</div>
+        </div>
+
+        <button class="btn-find" id="btn-find">🎮 Найти соперника</button>
+        <button class="btn-cancel" id="btn-cancel">✕ Отменить поиск</button>
+
+        <div class="divider">— или играй с другом —</div>
+
+        <button class="btn-create" id="btn-create">🚀 Создать комнату</button>
 
         <input type="text" id="room_code" placeholder="Код комнаты" maxlength="8"/>
-        <button class="btn-join" id="btn-join">⚔️ Войти в дуэль</button>
+        <button class="btn-join" id="btn-join">⚔️ Войти в комнату</button>
 
         <div id="error"></div>
 
@@ -172,20 +227,63 @@
 
 <script>
     const socket = io();
+    let searchTimer = null;
+    let searchSeconds = 0;
 
     function showError(msg) {
         document.getElementById('error').textContent = msg;
     }
 
+    function getUsername() {
+        return document.getElementById('username').value.trim();
+    }
+
+    // Найти соперника
+    document.getElementById('btn-find').addEventListener('click', function() {
+        const username = getUsername();
+        if (!username) return showError('Введи никнейм!');
+        localStorage.setItem('username', username);
+
+        // Показываем анимацию поиска
+        document.getElementById('searching-box').style.display = 'block';
+        document.getElementById('btn-find').style.display = 'none';
+        document.getElementById('btn-cancel').style.display = 'block';
+        document.getElementById('error').textContent = '';
+
+        searchSeconds = 0;
+        searchTimer = setInterval(function() {
+            searchSeconds++;
+            document.getElementById('search-timer').textContent = searchSeconds + ' сек';
+        }, 1000);
+
+        socket.emit('find_match', { username: username });
+    });
+
+    // Отменить поиск
+    document.getElementById('btn-cancel').addEventListener('click', function() {
+        const username = getUsername();
+        socket.emit('cancel_search', { username: username });
+        stopSearch();
+    });
+
+    function stopSearch() {
+        clearInterval(searchTimer);
+        document.getElementById('searching-box').style.display = 'none';
+        document.getElementById('btn-find').style.display = 'block';
+        document.getElementById('btn-cancel').style.display = 'none';
+    }
+
+    // Создать комнату с другом
     document.getElementById('btn-create').addEventListener('click', function() {
-        const username = document.getElementById('username').value.trim();
+        const username = getUsername();
         if (!username) return showError('Введи никнейм!');
         localStorage.setItem('username', username);
         socket.emit('create_room', { username: username });
     });
 
+    // Войти в комнату
     document.getElementById('btn-join').addEventListener('click', function() {
-        const username = document.getElementById('username').value.trim();
+        const username = getUsername();
         const room_id = document.getElementById('room_code').value.trim();
         if (!username) return showError('Введи никнейм!');
         if (!room_id) return showError('Введи код комнаты!');
@@ -195,17 +293,26 @@
         window.location.href = '/duel/' + room_id;
     });
 
+    // Соперник найден!
+    socket.on('match_found', function(data) {
+        stopSearch();
+        localStorage.setItem('room_id', data.room_id);
+        localStorage.setItem('should_join', 'true');
+        window.location.href = '/duel/' + data.room_id;
+    });
+
     socket.on('room_created', function(data) {
         localStorage.setItem('room_id', data.room_id);
         window.location.href = '/duel/' + data.room_id;
     });
 
-    socket.on('duel_start', function() {
-        window.location.href = '/duel/' + localStorage.getItem('room_id');
+    socket.on('search_cancelled', function() {
+        stopSearch();
     });
 
     socket.on('error', function(data) {
         showError(data.message);
+        stopSearch();
     });
 </script>
 </body>
