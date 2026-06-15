@@ -769,7 +769,11 @@ def duel(room_id):
 @app.route('/leaderboard')
 def leaderboard():
     players = Player.query.order_by(Player.rating.desc()).limit(20).all()
-    return render_template('leaderboard.html', players=players)
+    from flask import make_response
+    resp = make_response(render_template('leaderboard.html', players=players))
+    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    resp.headers['Pragma'] = 'no-cache'
+    return resp
 
 @app.route('/profile/<username>')
 def profile(username):
@@ -781,18 +785,27 @@ def profile(username):
     ).order_by(Match.played_at.desc()).limit(10).all()
     return render_template('profile.html', player=player, username=username, matches=matches)
 
-def update_ratings(winner_name, loser_name, task_title):
+DIFFICULTY_POINTS = {
+    'easy':   {'win': 25,  'loss': 50},
+    'medium': {'win': 50,  'loss': 25},
+    'hard':   {'win': 100, 'loss': 10},
+}
+
+def update_ratings(winner_name, loser_name, task_title, difficulty='easy'):
     with app.app_context():
         winner = Player.query.filter_by(username=winner_name).first()
         loser = Player.query.filter_by(username=loser_name).first()
         if winner and loser:
-            winner.rating += 25
+            points = DIFFICULTY_POINTS.get(difficulty, DIFFICULTY_POINTS['easy'])
+            winner.rating += points['win']
             winner.wins += 1
-            loser.rating = max(0, loser.rating - 25)
+            loser.rating = max(0, loser.rating - points['loss'])
             loser.losses += 1
             match = Match(winner=winner_name, loser=loser_name, task_title=task_title)
             db.session.add(match)
             db.session.commit()
+            return points['win'], -points['loss']
+    return 25, -25
 
 # --- Сокет события ---
 
@@ -903,8 +916,18 @@ def submit_code(data):
         place = len(room['finished'])
         if place == 1 and len(room['players']) == 2:
             other = [p for p in room['players'] if p != username][0]
-            update_ratings(username, other, task['title'])
-        emit('opponent_finished', {'username': username, 'place': place}, to=room_id)
+            difficulty = task.get('difficulty', 'easy')
+            win_pts, loss_pts = update_ratings(username, other, task['title'], difficulty)
+            # Уведомляем победителя
+            emit('rating_update', {'change': win_pts})
+            # Уведомляем проигравшего
+            emit('opponent_finished', {
+                'username': username,
+                'place': place,
+                'rating_change': loss_pts
+            }, to=room_id)
+        else:
+            emit('opponent_finished', {'username': username, 'place': place}, to=room_id)
     emit('test_results', {
         'results': results,
         'passed': passed,

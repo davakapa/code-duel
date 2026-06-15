@@ -367,18 +367,22 @@
         });
     });
 
+    socket.on('rating_update', function(data) {
+        showResult(true, '', 'Ты решил задачу первым!', data.change);
+    });
+
     socket.on('test_results', function(data) {
         document.getElementById('results-display').innerHTML =
             data.results.map(function(r) { return '<span class="result-badge">' + r + '</span>'; }).join('');
         document.getElementById('result-text').textContent = data.passed + '/' + data.total + ' тестов';
-        if (data.won) showResult(true, '', 'Ты решил задачу первым!', 25);
     });
 
     socket.on('opponent_finished', function(data) {
         const tag = document.getElementById('player-' + data.username);
         if (tag) tag.classList.add('done');
         if (data.username !== username && data.place === 1) {
-            showResult(false, '😔 Поражение', data.username + ' решил задачу быстрее тебя', -25);
+            const change = data.rating_change || -25;
+            showResult(false, '😔 Поражение', data.username + ' решил задачу быстрее тебя', change);
         }
     });
 
