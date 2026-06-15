@@ -793,18 +793,23 @@ DIFFICULTY_POINTS = {
 
 def update_ratings(winner_name, loser_name, task_title, difficulty='easy'):
     try:
-        winner = Player.query.filter_by(username=winner_name).first()
-        loser = Player.query.filter_by(username=loser_name).first()
+        points = DIFFICULTY_POINTS.get(difficulty, DIFFICULTY_POINTS['easy'])
+        winner = db.session.query(Player).filter_by(username=winner_name).first()
+        loser = db.session.query(Player).filter_by(username=loser_name).first()
+        print(f"Found winner: {winner}, loser: {loser}")
         if winner and loser:
-            points = DIFFICULTY_POINTS.get(difficulty, DIFFICULTY_POINTS['easy'])
-            winner.rating += points['win']
-            winner.wins += 1
+            winner.rating = winner.rating + points['win']
+            winner.wins = winner.wins + 1
             loser.rating = max(0, loser.rating - points['loss'])
-            loser.losses += 1
+            loser.losses = loser.losses + 1
             match = Match(winner=winner_name, loser=loser_name, task_title=task_title)
             db.session.add(match)
+            db.session.flush()
             db.session.commit()
+            print(f"Committed! Winner {winner_name} rating: {winner.rating}, Loser {loser_name} rating: {loser.rating}")
             return points['win'], -points['loss']
+        else:
+            print(f"Player not found! winner={winner_name}, loser={loser_name}")
     except Exception as e:
         db.session.rollback()
         print(f"Rating update error: {e}")
@@ -920,7 +925,12 @@ def submit_code(data):
         if place == 1 and len(room['players']) == 2:
             other = [p for p in room['players'] if p != username][0]
             difficulty = task.get('difficulty', 'easy')
-            win_pts, loss_pts = update_ratings(username, other, task['title'], difficulty)
+            try:
+                win_pts, loss_pts = update_ratings(username, other, task['title'], difficulty)
+                print(f"RATING UPDATE: {username} +{win_pts}, {other} {loss_pts}")
+            except Exception as e:
+                print(f"RATING ERROR: {e}")
+                win_pts, loss_pts = 25, -25
             # Уведомляем победителя
             emit('rating_update', {'change': win_pts})
             # Уведомляем проигравшего
