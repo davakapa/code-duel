@@ -792,7 +792,7 @@ DIFFICULTY_POINTS = {
 }
 
 def update_ratings(winner_name, loser_name, task_title, difficulty='easy'):
-    with app.app_context():
+    try:
         winner = Player.query.filter_by(username=winner_name).first()
         loser = Player.query.filter_by(username=loser_name).first()
         if winner and loser:
@@ -805,6 +805,9 @@ def update_ratings(winner_name, loser_name, task_title, difficulty='easy'):
             db.session.add(match)
             db.session.commit()
             return points['win'], -points['loss']
+    except Exception as e:
+        db.session.rollback()
+        print(f"Rating update error: {e}")
     return 25, -25
 
 # --- Сокет события ---
