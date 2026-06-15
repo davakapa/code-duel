@@ -63,7 +63,23 @@
             overflow-y: auto;
         }
 
-        .task-title { font-size: 20px; font-weight: bold; margin-bottom: 12px; }
+        .task-title { font-size: 20px; font-weight: bold; margin-bottom: 8px; }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .difficulty-easy { background: rgba(74, 222, 128, 0.15); color: #4ade80; border: 1px solid #4ade80; }
+        .difficulty-medium { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid #fbbf24; }
+        .difficulty-hard { background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid #f87171; }
+
         .task-desc { color: #ccc; line-height: 1.6; margin-bottom: 20px; }
 
         .tests-title {
@@ -128,6 +144,7 @@
         .result-badge { font-size: 18px; }
         .result-text { color: #aaa; font-size: 14px; }
 
+        /* Оверлей ожидания */
         #waiting-overlay {
             position: fixed;
             inset: 0;
@@ -173,6 +190,7 @@
 
         .waiting-hint { color: #666; font-size: 14px; margin-top: 8px; }
 
+        /* Красивый оверлей результата */
         #result-overlay {
             position: fixed;
             inset: 0;
@@ -182,23 +200,151 @@
             justify-content: center;
             align-items: center;
             z-index: 200;
+            animation: fadeIn 0.5s ease;
         }
 
-        .result-emoji { font-size: 80px; margin-bottom: 16px; }
-        .result-title { font-size: 36px; font-weight: bold; margin-bottom: 8px; }
-        .result-sub { color: #aaa; font-size: 18px; margin-bottom: 16px; }
-        .result-rating { font-size: 20px; margin-bottom: 30px; }
-        .rating-up { color: #4ade80; }
-        .rating-down { color: #f87171; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
 
-        .btn-home {
-            padding: 12px 32px;
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card {
             background: #1e1e2e;
-            border: 1px solid #a855f7;
+            border-radius: 24px;
+            padding: 48px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid #333;
+            box-shadow: 0 0 60px rgba(168, 85, 247, 0.15);
+        }
+
+        .result-emoji {
+            font-size: 80px;
+            display: block;
+            margin-bottom: 16px;
+            animation: bounceIn 0.6s ease 0.2s both;
+        }
+
+        .result-title {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            animation: slideUp 0.4s ease 0.4s both;
+        }
+
+        .result-title.win { color: #4ade80; }
+        .result-title.loss { color: #f87171; }
+        .result-title.draw { color: #fbbf24; }
+
+        .result-sub {
+            color: #aaa;
+            font-size: 16px;
+            margin-bottom: 24px;
+            animation: slideUp 0.4s ease 0.5s both;
+        }
+
+        .result-stats {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 28px;
+            animation: slideUp 0.4s ease 0.6s both;
+        }
+
+        .stat-item { text-align: center; }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .rating-change {
+            font-size: 22px;
+            font-weight: bold;
+            padding: 10px 24px;
+            border-radius: 12px;
+            margin-bottom: 28px;
+            animation: slideUp 0.4s ease 0.7s both;
+        }
+
+        .rating-change.positive {
+            background: rgba(74, 222, 128, 0.15);
+            color: #4ade80;
+            border: 1px solid #4ade80;
+        }
+
+        .rating-change.negative {
+            background: rgba(248, 113, 113, 0.15);
+            color: #f87171;
+            border: 1px solid #f87171;
+        }
+
+        .result-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            animation: slideUp 0.4s ease 0.8s both;
+        }
+
+        .btn-rematch {
+            padding: 12px 28px;
+            background: linear-gradient(90deg, #ff6b6b, #a855f7);
+            border: none;
             border-radius: 8px;
             color: white;
-            font-size: 16px;
+            font-size: 15px;
+            font-weight: bold;
             cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-rematch:hover { opacity: 0.85; }
+
+        .btn-home {
+            padding: 12px 28px;
+            background: #2a2a3e;
+            border: 1px solid #555;
+            border-radius: 8px;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-home:hover { background: #333; }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            animation: confettiFall linear forwards;
+            z-index: 300;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
     </style>
 </head>
@@ -215,11 +361,17 @@
 </div>
 
 <div id="result-overlay">
-    <div class="result-emoji" id="result-emoji">🏆</div>
-    <div class="result-title" id="result-title">Победа!</div>
-    <div class="result-sub" id="result-sub"></div>
-    <div class="result-rating" id="result-rating"></div>
-    <button class="btn-home" id="btn-home">🏠 На главную</button>
+    <div class="result-card">
+        <span class="result-emoji" id="result-emoji">🏆</span>
+        <div class="result-title" id="result-title">Победа!</div>
+        <div class="result-sub" id="result-sub"></div>
+        <div class="result-stats" id="result-stats"></div>
+        <div class="rating-change" id="rating-change"></div>
+        <div class="result-buttons">
+            <button class="btn-rematch" id="btn-rematch">🎮 Ещё раз</button>
+            <button class="btn-home" id="btn-home">🏠 На главную</button>
+        </div>
+    </div>
 </div>
 
 <div class="header">
@@ -231,6 +383,7 @@
 <div class="main">
     <div class="task-panel">
         <div class="task-title" id="task-title">Загрузка...</div>
+        <div id="difficulty-badge"></div>
         <div class="task-desc" id="task-desc"></div>
         <div class="tests-title">Примеры</div>
         <div id="test-cases"></div>
@@ -253,6 +406,8 @@
     const fromMatchmaking = localStorage.getItem('from_matchmaking') === 'true';
     let timerInterval = null;
     let secondsLeft = 300;
+    let matchStartTime = null;
+    let currentTask = null;
 
     if (isSecondPlayer) {
         document.getElementById('waiting-overlay').style.display = 'none';
@@ -276,7 +431,6 @@
         setTimeout(() => { this.disabled = false; }, 2000);
     });
 
-    // Таб в редакторе
     document.getElementById('code-editor').addEventListener('keydown', function(e) {
         if (e.key === 'Tab') {
             e.preventDefault();
@@ -288,6 +442,10 @@
     });
 
     document.getElementById('btn-home').addEventListener('click', function() {
+        window.location.href = '/';
+    });
+
+    document.getElementById('btn-rematch').addEventListener('click', function() {
         window.location.href = '/';
     });
 
@@ -304,6 +462,7 @@
     });
 
     function startTimer() {
+        matchStartTime = Date.now();
         timerInterval = setInterval(function() {
             secondsLeft--;
             const m = Math.floor(secondsLeft / 60).toString().padStart(2, '0');
@@ -313,43 +472,105 @@
             if (secondsLeft <= 60) el.classList.add('danger');
             if (secondsLeft <= 0) {
                 clearInterval(timerInterval);
-                showResult(false, 'Время вышло!', 'Никто не успел решить задачу', null);
+                showResult(false, 'draw', 'Время вышло!', 'Никто не успел решить задачу', null);
             }
         }, 1000);
     }
 
     function showTask(task) {
+        currentTask = task;
         document.getElementById('task-title').textContent = task.title;
         document.getElementById('task-desc').textContent = task.description;
+
+        const badge = document.getElementById('difficulty-badge');
+        const labels = { easy: '🟢 Лёгкая', medium: '🟡 Средняя', hard: '🔴 Сложная' };
+        badge.innerHTML = '<span class="difficulty-badge difficulty-' + task.difficulty + '">' + (labels[task.difficulty] || task.difficulty) + '</span>';
+
         const tc = document.getElementById('test-cases');
         tc.innerHTML = '';
         task.tests.forEach(function(t, i) {
             const args = Array.isArray(t.input) ? t.input.join(', ') : Object.values(t.input).join(', ');
             tc.innerHTML += '<div class="test-case"><b>Тест ' + (i+1) + ':</b> solution(' + args + ') → ' + t.output + '</div>';
         });
+
         const argCount = task.tests[0].input.length;
         let args = 'n';
         if (argCount === 2) args = 'a, b';
         if (argCount === 3) args = 'a, b, c';
-        if (task.tests[0].input[0] instanceof Array || Array.isArray(task.tests[0].input[0])) args = 'nums';
         if (typeof task.tests[0].input[0] === 'string') args = 's';
+        if (Array.isArray(task.tests[0].input[0])) args = 'nums';
         document.getElementById('code-editor').value = 'def solution(' + args + '):\n    # пиши здесь\n    pass';
     }
 
-    function showResult(won, title, sub, ratingChange) {
-        clearInterval(timerInterval);
-        document.getElementById('result-emoji').textContent = won ? '🏆' : '😔';
-        document.getElementById('result-title').textContent = won ? '🎉 Победа!' : title;
-        document.getElementById('result-sub').textContent = sub;
-        if (ratingChange !== null) {
-            const el = document.getElementById('result-rating');
-            if (ratingChange > 0) {
-                el.innerHTML = '<span class="rating-up">+' + ratingChange + ' рейтинга ⬆</span>';
-            } else {
-                el.innerHTML = '<span class="rating-down">' + ratingChange + ' рейтинга ⬇</span>';
-            }
+    function getTimeSpent() {
+        if (!matchStartTime) return 0;
+        return Math.floor((Date.now() - matchStartTime) / 1000);
+    }
+
+    function formatTime(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return m + ':' + s.toString().padStart(2, '0');
+    }
+
+    function spawnConfetti() {
+        const colors = ['#ff6b6b', '#a855f7', '#4ade80', '#fbbf24', '#60a5fa'];
+        for (let i = 0; i < 80; i++) {
+            setTimeout(function() {
+                const el = document.createElement('div');
+                el.className = 'confetti';
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                el.style.width = (Math.random() * 8 + 6) + 'px';
+                el.style.height = (Math.random() * 8 + 6) + 'px';
+                el.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                el.style.animationDelay = Math.random() * 1 + 's';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 4000);
+            }, i * 30);
         }
-        document.getElementById('result-overlay').style.display = 'flex';
+    }
+
+    function showResult(won, type, title, sub, ratingChange) {
+        clearInterval(timerInterval);
+        const timeSpent = getTimeSpent();
+        const overlay = document.getElementById('result-overlay');
+
+        document.getElementById('result-emoji').textContent = won ? '🏆' : (type === 'draw' ? '🤝' : '😔');
+
+        const titleEl = document.getElementById('result-title');
+        titleEl.textContent = won ? '🎉 Победа!' : (type === 'draw' ? '🤝 Ничья' : title);
+        titleEl.className = 'result-title ' + (won ? 'win' : (type === 'draw' ? 'draw' : 'loss'));
+
+        document.getElementById('result-sub').textContent = sub;
+
+        // Статистика
+        const statsEl = document.getElementById('result-stats');
+        const diffLabels = { easy: 'Лёгкая', medium: 'Средняя', hard: 'Сложная' };
+        statsEl.innerHTML = `
+            <div class="stat-item">
+                <span class="stat-value">${formatTime(timeSpent)}</span>
+                <span class="stat-label">Время</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">${currentTask ? (diffLabels[currentTask.difficulty] || '—') : '—'}</span>
+                <span class="stat-label">Сложность</span>
+            </div>
+        `;
+
+        // Изменение рейтинга
+        const ratingEl = document.getElementById('rating-change');
+        if (ratingChange !== null && ratingChange !== undefined) {
+            ratingEl.style.display = 'block';
+            ratingEl.className = 'rating-change ' + (ratingChange > 0 ? 'positive' : 'negative');
+            ratingEl.textContent = (ratingChange > 0 ? '+' : '') + ratingChange + ' рейтинга';
+        } else {
+            ratingEl.style.display = 'none';
+        }
+
+        overlay.style.display = 'flex';
+
+        if (won) spawnConfetti();
     }
 
     socket.on('duel_start', function(data) {
@@ -368,7 +589,7 @@
     });
 
     socket.on('rating_update', function(data) {
-        showResult(true, '', 'Ты решил задачу первым!', data.change);
+        showResult(true, 'win', '', 'Ты решил задачу первым!', data.change);
     });
 
     socket.on('test_results', function(data) {
@@ -382,7 +603,7 @@
         if (tag) tag.classList.add('done');
         if (data.username !== username && data.place === 1) {
             const change = data.rating_change || -25;
-            showResult(false, '😔 Поражение', data.username + ' решил задачу быстрее тебя', change);
+            showResult(false, 'loss', '😔 Поражение', data.username + ' решил задачу быстрее тебя', change);
         }
     });
 
