@@ -5,10 +5,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import uuid
 import random
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret123'
-import os
+
 database_url = os.environ.get('DATABASE_URL', 'sqlite:///codeduel.db')
 if database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
@@ -17,8 +18,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
-
-# --- Модели ---
 
 class Player(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -50,10 +49,12 @@ rooms = {}
 matchmaking_queue = []
 
 TASKS = [
+    # === EASY ===
     {
         "id": 1,
         "title": "Сумма двух чисел",
         "description": "Напиши функцию solution(a, b), которая возвращает сумму двух чисел.",
+        "difficulty": "easy",
         "tests": [
             {"input": [1, 2], "output": 3},
             {"input": [10, 20], "output": 30},
@@ -64,6 +65,7 @@ TASKS = [
         "id": 2,
         "title": "Максимум из трёх",
         "description": "Напиши функцию solution(a, b, c), которая возвращает максимальное из трёх чисел.",
+        "difficulty": "easy",
         "tests": [
             {"input": [1, 2, 3], "output": 3},
             {"input": [10, 5, 8], "output": 10},
@@ -74,6 +76,7 @@ TASKS = [
         "id": 3,
         "title": "Чётное или нечётное",
         "description": "Напиши функцию solution(n), которая возвращает True если число чётное, и False если нечётное.",
+        "difficulty": "easy",
         "tests": [
             {"input": [2], "output": True},
             {"input": [3], "output": False},
@@ -84,6 +87,7 @@ TASKS = [
         "id": 4,
         "title": "Факториал",
         "description": "Напиши функцию solution(n), которая возвращает факториал числа n.",
+        "difficulty": "easy",
         "tests": [
             {"input": [0], "output": 1},
             {"input": [5], "output": 120},
@@ -94,6 +98,7 @@ TASKS = [
         "id": 5,
         "title": "Переворот строки",
         "description": "Напиши функцию solution(s), которая возвращает строку в обратном порядке.",
+        "difficulty": "easy",
         "tests": [
             {"input": ["hello"], "output": "olleh"},
             {"input": ["abcd"], "output": "dcba"},
@@ -104,6 +109,7 @@ TASKS = [
         "id": 6,
         "title": "Палиндром",
         "description": "Напиши функцию solution(s), которая возвращает True если строка является палиндромом, и False если нет.",
+        "difficulty": "easy",
         "tests": [
             {"input": ["racecar"], "output": True},
             {"input": ["hello"], "output": False},
@@ -114,6 +120,7 @@ TASKS = [
         "id": 7,
         "title": "Сумма списка",
         "description": "Напиши функцию solution(nums), которая принимает список чисел и возвращает их сумму без использования sum().",
+        "difficulty": "easy",
         "tests": [
             {"input": [[1, 2, 3, 4, 5]], "output": 15},
             {"input": [[-1, -2, 3]], "output": 0},
@@ -124,6 +131,7 @@ TASKS = [
         "id": 8,
         "title": "Количество гласных",
         "description": "Напиши функцию solution(s), которая возвращает количество гласных букв (a, e, i, o, u) в строке.",
+        "difficulty": "easy",
         "tests": [
             {"input": ["hello"], "output": 2},
             {"input": ["python"], "output": 1},
@@ -134,6 +142,7 @@ TASKS = [
         "id": 9,
         "title": "Число Фибоначчи",
         "description": "Напиши функцию solution(n), которая возвращает n-е число Фибоначчи. F(0)=0, F(1)=1, F(2)=1...",
+        "difficulty": "easy",
         "tests": [
             {"input": [0], "output": 0},
             {"input": [6], "output": 8},
@@ -144,6 +153,7 @@ TASKS = [
         "id": 10,
         "title": "Простое число",
         "description": "Напиши функцию solution(n), которая возвращает True если число простое, и False если нет.",
+        "difficulty": "easy",
         "tests": [
             {"input": [2], "output": True},
             {"input": [9], "output": False},
@@ -154,6 +164,7 @@ TASKS = [
         "id": 11,
         "title": "Максимум в списке",
         "description": "Напиши функцию solution(nums), которая возвращает максимальный элемент списка без использования max().",
+        "difficulty": "easy",
         "tests": [
             {"input": [[3, 1, 4, 1, 5, 9]], "output": 9},
             {"input": [[-5, -1, -3]], "output": -1},
@@ -164,6 +175,7 @@ TASKS = [
         "id": 12,
         "title": "FizzBuzz",
         "description": "Напиши функцию solution(n), которая возвращает 'Fizz' если n делится на 3, 'Buzz' если на 5, 'FizzBuzz' если на 15, и само число в остальных случаях.",
+        "difficulty": "easy",
         "tests": [
             {"input": [3], "output": "Fizz"},
             {"input": [5], "output": "Buzz"},
@@ -175,6 +187,7 @@ TASKS = [
         "id": 13,
         "title": "Степень числа",
         "description": "Напиши функцию solution(base, exp), которая возвращает base в степени exp без использования ** и pow().",
+        "difficulty": "easy",
         "tests": [
             {"input": [2, 10], "output": 1024},
             {"input": [3, 3], "output": 27},
@@ -185,10 +198,519 @@ TASKS = [
         "id": 14,
         "title": "Уникальные элементы",
         "description": "Напиши функцию solution(nums), которая возвращает список уникальных элементов, сохраняя порядок первого появления.",
+        "difficulty": "easy",
         "tests": [
             {"input": [[1, 2, 2, 3, 3, 3]], "output": [1, 2, 3]},
             {"input": [[5, 5, 5]], "output": [5]},
             {"input": [[1, 2, 3]], "output": [1, 2, 3]},
+        ]
+    },
+    {
+        "id": 15,
+        "title": "Сортировка пузырьком",
+        "description": "Напиши функцию solution(nums), которая сортирует список методом пузырька и возвращает его.",
+        "difficulty": "easy",
+        "tests": [
+            {"input": [[3, 1, 2]], "output": [1, 2, 3]},
+            {"input": [[5, 4, 3, 2, 1]], "output": [1, 2, 3, 4, 5]},
+            {"input": [[1]], "output": [1]},
+        ]
+    },
+    {
+        "id": 16,
+        "title": "Среднее арифметическое",
+        "description": "Напиши функцию solution(nums), которая возвращает среднее арифметическое списка чисел.",
+        "difficulty": "easy",
+        "tests": [
+            {"input": [[1, 2, 3, 4, 5]], "output": 3.0},
+            {"input": [[10, 20]], "output": 15.0},
+            {"input": [[7]], "output": 7.0},
+        ]
+    },
+    {
+        "id": 17,
+        "title": "Подсчёт элементов",
+        "description": "Напиши функцию solution(nums, x), которая возвращает количество вхождений x в список nums.",
+        "difficulty": "easy",
+        "tests": [
+            {"input": [[1, 2, 2, 3, 2], 2], "output": 3},
+            {"input": [[1, 1, 1], 1], "output": 3},
+            {"input": [[1, 2, 3], 5], "output": 0},
+        ]
+    },
+    {
+        "id": 18,
+        "title": "Сумма цифр",
+        "description": "Напиши функцию solution(n), которая возвращает сумму цифр числа n.",
+        "difficulty": "easy",
+        "tests": [
+            {"input": [123], "output": 6},
+            {"input": [9999], "output": 36},
+            {"input": [0], "output": 0},
+        ]
+    },
+    {
+        "id": 19,
+        "title": "Перевод в двоичную систему",
+        "description": "Напиши функцию solution(n), которая возвращает строку с двоичным представлением числа n без использования bin().",
+        "difficulty": "easy",
+        "tests": [
+            {"input": [2], "output": "10"},
+            {"input": [10], "output": "1010"},
+            {"input": [1], "output": "1"},
+        ]
+    },
+    {
+        "id": 20,
+        "title": "Анаграмма",
+        "description": "Напиши функцию solution(s1, s2), которая возвращает True если строки являются анаграммами друг друга.",
+        "difficulty": "easy",
+        "tests": [
+            {"input": ["listen", "silent"], "output": True},
+            {"input": ["hello", "world"], "output": False},
+            {"input": ["abc", "cba"], "output": True},
+        ]
+    },
+    # === MEDIUM ===
+    {
+        "id": 21,
+        "title": "Второй максимум",
+        "description": "Напиши функцию solution(nums), которая возвращает второй по величине элемент списка.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": [[1, 2, 3, 4, 5]], "output": 4},
+            {"input": [[10, 5, 8]], "output": 8},
+            {"input": [[1, 1, 2]], "output": 1},
+        ]
+    },
+    {
+        "id": 22,
+        "title": "Подстрока",
+        "description": "Напиши функцию solution(s, sub), которая возвращает True если sub является подстрокой s. Нельзя использовать оператор in.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": ["hello world", "world"], "output": True},
+            {"input": ["python", "java"], "output": False},
+            {"input": ["abcdef", "cde"], "output": True},
+        ]
+    },
+    {
+        "id": 23,
+        "title": "Квадратный корень",
+        "description": "Напиши функцию solution(n), которая возвращает целую часть квадратного корня числа n без использования math.sqrt() и **.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": [9], "output": 3},
+            {"input": [16], "output": 4},
+            {"input": [20], "output": 4},
+        ]
+    },
+    {
+        "id": 24,
+        "title": "Удалить дубликаты из строки",
+        "description": "Напиши функцию solution(s), которая возвращает строку без повторяющихся символов, сохраняя порядок первого появления.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": ["aabbcc"], "output": "abc"},
+            {"input": ["hello"], "output": "helo"},
+            {"input": ["abcd"], "output": "abcd"},
+        ]
+    },
+    {
+        "id": 25,
+        "title": "Количество слов",
+        "description": "Напиши функцию solution(s), которая возвращает количество слов в строке.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": ["hello world"], "output": 2},
+            {"input": ["one two three four"], "output": 4},
+            {"input": ["python"], "output": 1},
+        ]
+    },
+    {
+        "id": 26,
+        "title": "Список квадратов",
+        "description": "Напиши функцию solution(n), которая возвращает список квадратов чисел от 1 до n включительно.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": [5], "output": [1, 4, 9, 16, 25]},
+            {"input": [3], "output": [1, 4, 9]},
+            {"input": [1], "output": [1]},
+        ]
+    },
+    {
+        "id": 27,
+        "title": "Наибольший общий делитель",
+        "description": "Напиши функцию solution(a, b), которая возвращает наибольший общий делитель двух чисел без использования math.gcd().",
+        "difficulty": "medium",
+        "tests": [
+            {"input": [12, 8], "output": 4},
+            {"input": [100, 75], "output": 25},
+            {"input": [7, 3], "output": 1},
+        ]
+    },
+    {
+        "id": 28,
+        "title": "Переворот списка",
+        "description": "Напиши функцию solution(nums), которая возвращает список в обратном порядке без использования reverse() и срезов [::-1].",
+        "difficulty": "medium",
+        "tests": [
+            {"input": [[1, 2, 3, 4, 5]], "output": [5, 4, 3, 2, 1]},
+            {"input": [[10, 20]], "output": [20, 10]},
+            {"input": [[42]], "output": [42]},
+        ]
+    },
+    {
+        "id": 29,
+        "title": "Матрица — транспонирование",
+        "description": "Напиши функцию solution(matrix), которая возвращает транспонированную матрицу.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": [[[1, 2], [3, 4]]], "output": [[1, 3], [2, 4]]},
+            {"input": [[[1, 2, 3]]], "output": [[1], [2], [3]]},
+            {"input": [[[1, 2], [3, 4], [5, 6]]], "output": [[1, 3, 5], [2, 4, 6]]},
+        ]
+    },
+    {
+        "id": 30,
+        "title": "Поиск пары с суммой",
+        "description": "Напиши функцию solution(nums, target), которая возвращает True если в списке есть два числа дающих в сумме target.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": [[1, 2, 3, 4], 7], "output": True},
+            {"input": [[1, 2, 3], 10], "output": False},
+            {"input": [[5, 5], 10], "output": True},
+        ]
+    },
+    {
+        "id": 31,
+        "title": "Группировка по чётности",
+        "description": "Напиши функцию solution(nums), которая возвращает словарь с ключами 'even' и 'odd', содержащий чётные и нечётные числа списка.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": [[1, 2, 3, 4, 5]], "output": {"even": [2, 4], "odd": [1, 3, 5]}},
+            {"input": [[2, 4, 6]], "output": {"even": [2, 4, 6], "odd": []}},
+            {"input": [[1, 3]], "output": {"even": [], "odd": [1, 3]}},
+        ]
+    },
+    {
+        "id": 32,
+        "title": "Самое длинное слово",
+        "description": "Напиши функцию solution(s), которая возвращает самое длинное слово в строке. Если таких несколько — первое.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": ["hello world python"], "output": "python"},
+            {"input": ["cat dog elephant"], "output": "elephant"},
+            {"input": ["one two"], "output": "one"},
+        ]
+    },
+    {
+        "id": 33,
+        "title": "Матрица — сумма диагонали",
+        "description": "Напиши функцию solution(matrix), которая возвращает сумму элементов главной диагонали квадратной матрицы.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": [[[1, 2], [3, 4]]], "output": 5},
+            {"input": [[[1, 0, 0], [0, 2, 0], [0, 0, 3]]], "output": 6},
+            {"input": [[[5]]], "output": 5},
+        ]
+    },
+    {
+        "id": 34,
+        "title": "Числа Армстронга",
+        "description": "Напиши функцию solution(n), которая возвращает True если n является числом Армстронга. Например 153 = 1³+5³+3³.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": [153], "output": True},
+            {"input": [370], "output": True},
+            {"input": [123], "output": False},
+        ]
+    },
+    {
+        "id": 35,
+        "title": "Частота символов",
+        "description": "Напиши функцию solution(s), которая возвращает словарь где ключи — символы строки, значения — количество вхождений.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": ["hello"], "output": {"h": 1, "e": 1, "l": 2, "o": 1}},
+            {"input": ["aaa"], "output": {"a": 3}},
+            {"input": ["ab"], "output": {"a": 1, "b": 1}},
+        ]
+    },
+    {
+        "id": 36,
+        "title": "Разворот слов",
+        "description": "Напиши функцию solution(s), которая переворачивает порядок слов в строке.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": ["hello world"], "output": "world hello"},
+            {"input": ["one two three"], "output": "three two one"},
+            {"input": ["python"], "output": "python"},
+        ]
+    },
+    {
+        "id": 37,
+        "title": "Слияние отсортированных списков",
+        "description": "Напиши функцию solution(a, b), которая сливает два отсортированных списка в один отсортированный список.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": [[1, 3, 5], [2, 4, 6]], "output": [1, 2, 3, 4, 5, 6]},
+            {"input": [[1, 2], [3, 4]], "output": [1, 2, 3, 4]},
+            {"input": [[], [1, 2]], "output": [1, 2]},
+        ]
+    },
+    {
+        "id": 38,
+        "title": "Количество гласных и согласных",
+        "description": "Напиши функцию solution(s), которая возвращает список [гласные, согласные].",
+        "difficulty": "medium",
+        "tests": [
+            {"input": ["hello"], "output": [2, 3]},
+            {"input": ["python"], "output": [1, 5]},
+            {"input": ["aeiou"], "output": [5, 0]},
+        ]
+    },
+    {
+        "id": 39,
+        "title": "Сумма простых чисел",
+        "description": "Напиши функцию solution(n), которая возвращает сумму всех простых чисел до n включительно.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": [10], "output": 17},
+            {"input": [20], "output": 77},
+            {"input": [5], "output": 10},
+        ]
+    },
+    {
+        "id": 40,
+        "title": "Поворот списка",
+        "description": "Напиши функцию solution(nums, k), которая циклически сдвигает список вправо на k позиций.",
+        "difficulty": "medium",
+        "tests": [
+            {"input": [[1, 2, 3, 4, 5], 2], "output": [4, 5, 1, 2, 3]},
+            {"input": [[1, 2, 3], 1], "output": [3, 1, 2]},
+            {"input": [[1, 2], 4], "output": [1, 2]},
+        ]
+    },
+    # === HARD ===
+    {
+        "id": 41,
+        "title": "Скобочная последовательность",
+        "description": "Напиши функцию solution(s), которая возвращает True если строка содержит правильную скобочную последовательность из (), [], {}.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": ["()[]{}"], "output": True},
+            {"input": ["([)]"], "output": False},
+            {"input": ["{[]}"], "output": True},
+        ]
+    },
+    {
+        "id": 42,
+        "title": "Наибольшая подстрока без повторений",
+        "description": "Напиши функцию solution(s), которая возвращает длину наибольшей подстроки без повторяющихся символов.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": ["abcabcbb"], "output": 3},
+            {"input": ["bbbbb"], "output": 1},
+            {"input": ["pwwkew"], "output": 3},
+        ]
+    },
+    {
+        "id": 43,
+        "title": "Количество островов",
+        "description": "Напиши функцию solution(grid), которая считает количество островов в матрице (1 — суша, 0 — вода).",
+        "difficulty": "hard",
+        "tests": [
+            {"input": [[[1,1,0],[0,1,0],[0,0,1]]], "output": 2},
+            {"input": [[[1,0,0],[0,0,0],[0,0,1]]], "output": 2},
+            {"input": [[[1,1],[1,1]]], "output": 1},
+        ]
+    },
+    {
+        "id": 44,
+        "title": "Длиннейшая общая подпоследовательность",
+        "description": "Напиши функцию solution(s1, s2), которая возвращает длину наибольшей общей подпоследовательности (LCS).",
+        "difficulty": "hard",
+        "tests": [
+            {"input": ["abcde", "ace"], "output": 3},
+            {"input": ["abc", "abc"], "output": 3},
+            {"input": ["abc", "def"], "output": 0},
+        ]
+    },
+    {
+        "id": 45,
+        "title": "Задача о рюкзаке",
+        "description": "Напиши функцию solution(weights, values, capacity), которая возвращает максимальную стоимость предметов в рюкзаке.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": [[1, 2, 3], [6, 10, 12], 5], "output": 22},
+            {"input": [[2, 3], [3, 4], 5], "output": 7},
+            {"input": [[1], [10], 1], "output": 10},
+        ]
+    },
+    {
+        "id": 46,
+        "title": "Генерация скобок",
+        "description": "Напиши функцию solution(n), которая возвращает все возможные правильные скобочные последовательности из n пар скобок в виде отсортированного списка.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": [1], "output": ["()"]},
+            {"input": [2], "output": ["(())", "()()"]},
+            {"input": [3], "output": ["((()))", "(()())", "(())()", "()(())", "()()()"]},
+        ]
+    },
+    {
+        "id": 47,
+        "title": "Двоичный поиск",
+        "description": "Напиши функцию solution(nums, target), которая реализует двоичный поиск и возвращает индекс target, или -1 если не найден.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": [[1, 2, 3, 4, 5], 3], "output": 2},
+            {"input": [[1, 2, 3, 4, 5], 6], "output": -1},
+            {"input": [[1], 1], "output": 0},
+        ]
+    },
+    {
+        "id": 48,
+        "title": "Быстрая сортировка",
+        "description": "Напиши функцию solution(nums), которая сортирует список алгоритмом QuickSort и возвращает его.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": [[3, 6, 8, 10, 1, 2, 1]], "output": [1, 1, 2, 3, 6, 8, 10]},
+            {"input": [[5, 4, 3, 2, 1]], "output": [1, 2, 3, 4, 5]},
+            {"input": [[1]], "output": [1]},
+        ]
+    },
+    {
+        "id": 49,
+        "title": "Числа в спирали",
+        "description": "Напиши функцию solution(n), которая возвращает матрицу n×n заполненную числами от 1 до n² по спирали.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": [1], "output": [[1]]},
+            {"input": [2], "output": [[1, 2], [4, 3]]},
+            {"input": [3], "output": [[1, 2, 3], [8, 9, 4], [7, 6, 5]]},
+        ]
+    },
+    {
+        "id": 50,
+        "title": "Минимальный путь в матрице",
+        "description": "Напиши функцию solution(grid), которая возвращает минимальную сумму пути из верхнего левого в нижний правый угол. Двигаться можно только вправо или вниз.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": [[[1, 3, 1], [1, 5, 1], [4, 2, 1]]], "output": 7},
+            {"input": [[[1, 2], [3, 4]]], "output": 7},
+            {"input": [[[1]]], "output": 1},
+        ]
+    },
+    {
+        "id": 51,
+        "title": "Самая длинная возрастающая подпоследовательность",
+        "description": "Напиши функцию solution(nums), которая возвращает длину наибольшей строго возрастающей подпоследовательности (LIS).",
+        "difficulty": "hard",
+        "tests": [
+            {"input": [[10, 9, 2, 5, 3, 7, 101, 18]], "output": 4},
+            {"input": [[0, 1, 0, 3, 2, 3]], "output": 4},
+            {"input": [[7, 7, 7]], "output": 1},
+        ]
+    },
+    {
+        "id": 52,
+        "title": "Калькулятор",
+        "description": "Напиши функцию solution(s), которая вычисляет результат выражения содержащего +, -, *, / и целые числа. Без использования eval().",
+        "difficulty": "hard",
+        "tests": [
+            {"input": ["3+2*2"], "output": 7},
+            {"input": ["10/2+3"], "output": 8},
+            {"input": ["2+3*4-1"], "output": 13},
+        ]
+    },
+    {
+        "id": 53,
+        "title": "Перестановки",
+        "description": "Напиши функцию solution(nums), которая возвращает все перестановки списка в виде отсортированного списка списков.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": [[1, 2]], "output": [[1, 2], [2, 1]]},
+            {"input": [[1, 2, 3]], "output": [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]},
+            {"input": [[1]], "output": [[1]]},
+        ]
+    },
+    {
+        "id": 54,
+        "title": "Разбиение на подмножества с равной суммой",
+        "description": "Напиши функцию solution(nums), которая возвращает True если список можно разбить на два подмножества с равной суммой.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": [[1, 5, 11, 5]], "output": True},
+            {"input": [[1, 2, 3, 5]], "output": False},
+            {"input": [[1, 1]], "output": True},
+        ]
+    },
+    {
+        "id": 55,
+        "title": "Количество способов подняться по лестнице",
+        "description": "Напиши функцию solution(n), которая возвращает количество способов подняться на n ступеней если можно делать шаги по 1 или 2 ступени.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": [2], "output": 2},
+            {"input": [5], "output": 8},
+            {"input": [10], "output": 89},
+        ]
+    },
+    {
+        "id": 56,
+        "title": "Сжатие строки RLE",
+        "description": "Напиши функцию solution(s), которая сжимает строку используя RLE кодирование. Например 'aabbb' → 'a2b3'. Если символ встречается 1 раз — цифра не пишется.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": ["aabbb"], "output": "a2b3"},
+            {"input": ["abcd"], "output": "abcd"},
+            {"input": ["aaabba"], "output": "a3b2a"},
+        ]
+    },
+    {
+        "id": 57,
+        "title": "Игра Жизнь",
+        "description": "Напиши функцию solution(board), которая делает один шаг симуляции игры Жизнь Конвея. 1 — живая клетка, 0 — мёртвая.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": [[[0,1,0],[0,0,1],[1,1,1],[0,0,0]]], "output": [[0,0,0],[1,0,1],[0,1,1],[0,1,0]]},
+            {"input": [[[1,1],[1,0]]], "output": [[1,1],[1,1]]},
+            {"input": [[[0,0],[0,0]]], "output": [[0,0],[0,0]]},
+        ]
+    },
+    {
+        "id": 58,
+        "title": "Топологическая сортировка",
+        "description": "Напиши функцию solution(n, edges), которая возвращает один из вариантов топологической сортировки графа с n вершинами.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": [4, [[0,1],[0,2],[1,3],[2,3]]], "output": [0, 1, 2, 3]},
+            {"input": [3, [[0,1],[1,2]]], "output": [0, 1, 2]},
+            {"input": [2, [[1,0]]], "output": [1, 0]},
+        ]
+    },
+    {
+        "id": 59,
+        "title": "Регулярное выражение",
+        "description": "Напиши функцию solution(s, p), которая реализует сопоставление с шаблоном где '.' соответствует любому символу, '*' — ноль или более предыдущих символов.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": ["aa", "a*"], "output": True},
+            {"input": ["ab", ".*"], "output": True},
+            {"input": ["aab", "c*a*b"], "output": True},
+        ]
+    },
+    {
+        "id": 60,
+        "title": "Судоку — проверка",
+        "description": "Напиши функцию solution(board), которая возвращает True если доска судоку 9x9 заполнена правильно. 0 означает пустую клетку.",
+        "difficulty": "hard",
+        "tests": [
+            {"input": [[[5,3,4,6,7,8,9,1,2],[6,7,2,1,9,5,3,4,8],[1,9,8,3,4,2,5,6,7],[8,5,9,7,6,1,4,2,3],[4,2,6,8,5,3,7,9,1],[7,1,3,9,2,4,8,5,6],[9,6,1,5,3,7,2,8,4],[2,8,7,4,1,9,6,3,5],[3,4,5,2,8,6,1,7,9]]], "output": True},
+            {"input": [[[5,3,4,6,7,8,9,1,2],[6,7,2,1,9,5,3,4,8],[1,9,8,3,4,2,5,6,7],[8,5,9,7,6,1,4,2,3],[4,2,6,8,5,3,7,9,1],[7,1,3,9,2,4,8,5,6],[9,6,1,5,3,7,2,8,4],[2,8,7,4,1,9,6,3,5],[3,4,5,2,8,6,1,7,5]]], "output": False},
+            {"input": [[[5,3,0,0,7,0,0,0,0],[6,0,0,1,9,5,0,0,0],[0,9,8,0,0,0,0,6,0],[8,0,0,0,6,0,0,0,3],[4,0,0,8,0,3,0,0,1],[7,0,0,0,2,0,0,0,6],[0,6,0,0,0,0,2,8,0],[0,0,0,4,1,9,0,0,5],[0,0,0,0,8,0,0,7,9]]], "output": True},
         ]
     },
 ]
@@ -214,10 +736,7 @@ def register():
             return render_template('register.html', error='Пароль минимум 4 символа!')
         if Player.query.filter_by(username=username).first():
             return render_template('register.html', error='Этот никнейм уже занят!')
-        player = Player(
-            username=username,
-            password=generate_password_hash(password)
-        )
+        player = Player(username=username, password=generate_password_hash(password))
         db.session.add(player)
         db.session.commit()
         session['username'] = username
@@ -262,8 +781,6 @@ def profile(username):
     ).order_by(Match.played_at.desc()).limit(10).all()
     return render_template('profile.html', player=player, username=username, matches=matches)
 
-# --- Вспомогательные функции ---
-
 def update_ratings(winner_name, loser_name, task_title):
     with app.app_context():
         winner = Player.query.filter_by(username=winner_name).first()
@@ -284,7 +801,6 @@ def find_match(data):
     username = data['username']
     global matchmaking_queue
     matchmaking_queue = [p for p in matchmaking_queue if p['username'] != username]
-
     if matchmaking_queue:
         opponent = matchmaking_queue.pop(0)
         room_id = str(uuid.uuid4())[:8]
