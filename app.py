@@ -820,12 +820,22 @@ def update_ratings(winner_name, loser_name, task_title, difficulty='easy'):
 @socketio.on('find_match')
 def find_match(data):
     username = data['username']
+    difficulty = data.get('difficulty', 'easy')
     global matchmaking_queue
+
+    # Убираем если уже в очереди
     matchmaking_queue = [p for p in matchmaking_queue if p['username'] != username]
-    if matchmaking_queue:
-        opponent = matchmaking_queue.pop(0)
+
+    # Ищем соперника с той же сложностью
+    opponent = None
+    for p in matchmaking_queue:
+        if p.get('difficulty') == difficulty:
+            opponent = p
+            break
+
+    if opponent:
+        matchmaking_queue.remove(opponent)
         room_id = str(uuid.uuid4())[:8]
-        difficulty = data.get('difficulty', 'easy')
         filtered = [t for t in TASKS if t.get('difficulty') == difficulty]
         task = random.choice(filtered if filtered else TASKS)
         rooms[room_id] = {
@@ -841,7 +851,11 @@ def find_match(data):
             'players': [opponent['username'], username]
         }, to=room_id)
     else:
-        matchmaking_queue.append({'username': username, 'sid': request.sid})
+        matchmaking_queue.append({
+            'username': username,
+            'sid': request.sid,
+            'difficulty': difficulty
+        })
         emit('searching')
 
 @socketio.on('cancel_search')
