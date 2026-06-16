@@ -17,7 +17,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 class Player(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -825,7 +825,9 @@ def find_match(data):
     if matchmaking_queue:
         opponent = matchmaking_queue.pop(0)
         room_id = str(uuid.uuid4())[:8]
-        task = random.choice(TASKS)
+        difficulty = data.get('difficulty', 'easy')
+        filtered = [t for t in TASKS if t.get('difficulty') == difficulty]
+        task = random.choice(filtered if filtered else TASKS)
         rooms[room_id] = {
             'players': [opponent['username'], username],
             'task': task,
@@ -851,7 +853,9 @@ def cancel_search(data):
 @socketio.on('create_room')
 def create_room(data):
     room_id = str(uuid.uuid4())[:8]
-    task = random.choice(TASKS)
+    difficulty = data.get('difficulty', 'easy')
+    filtered = [t for t in TASKS if t.get('difficulty') == difficulty]
+    task = random.choice(filtered if filtered else TASKS)
     rooms[room_id] = {
         'players': [data['username']],
         'task': task,

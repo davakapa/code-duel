@@ -45,17 +45,8 @@
         }
 
         .nav a:hover { background: #2a2a3e; color: white; }
-
-        .nav .username {
-            color: #a855f7;
-            font-weight: bold;
-            font-size: 15px;
-        }
-
-        .nav .logout {
-            color: #ff6b6b;
-            border: 1px solid #ff6b6b;
-        }
+        .nav .username { color: #a855f7; font-weight: bold; font-size: 15px; }
+        .nav .logout { color: #ff6b6b; border: 1px solid #ff6b6b; }
 
         .main {
             flex: 1;
@@ -66,7 +57,7 @@
 
         .container {
             text-align: center;
-            width: 420px;
+            width: 440px;
             padding: 20px;
         }
 
@@ -78,23 +69,84 @@
             margin-bottom: 10px;
         }
 
-        .subtitle {
-            color: #888;
-            margin-bottom: 32px;
-            font-size: 16px;
-        }
+        .subtitle { color: #888; margin-bottom: 24px; font-size: 16px; }
 
         .welcome {
             background: #1e1e2e;
             border: 1px solid #333;
             border-radius: 10px;
             padding: 12px 20px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             color: #ccc;
             font-size: 15px;
         }
 
         .welcome span { color: #a855f7; font-weight: bold; }
+
+        /* Выбор сложности */
+        .difficulty-select { margin-bottom: 16px; }
+
+        .difficulty-label {
+            color: #888;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .difficulty-buttons { display: flex; gap: 8px; }
+
+        .btn-diff {
+            flex: 1;
+            padding: 12px 8px;
+            background: #1e1e2e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #aaa;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            width: auto;
+            margin-bottom: 0;
+        }
+
+        .btn-diff span {
+            font-size: 11px;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .btn-diff:hover { border-color: #a855f7; color: white; }
+
+        .btn-diff.active[data-diff="easy"] {
+            border-color: #4ade80;
+            color: #4ade80;
+            background: rgba(74, 222, 128, 0.1);
+        }
+
+        .btn-diff.active[data-diff="easy"] span { color: #4ade80; opacity: 0.7; }
+
+        .btn-diff.active[data-diff="medium"] {
+            border-color: #fbbf24;
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.1);
+        }
+
+        .btn-diff.active[data-diff="medium"] span { color: #fbbf24; opacity: 0.7; }
+
+        .btn-diff.active[data-diff="hard"] {
+            border-color: #f87171;
+            color: #f87171;
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        .btn-diff.active[data-diff="hard"] span { color: #f87171; opacity: 0.7; }
 
         input {
             width: 100%;
@@ -172,7 +224,13 @@
             animation: pulse 1.5s infinite;
         }
 
-        .searching-timer { color: #888; font-size: 14px; margin-top: 8px; }
+        .searching-diff {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .searching-timer { color: #888; font-size: 14px; margin-top: 4px; }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
@@ -180,7 +238,6 @@
         }
 
         .bottom-links { margin-top: 24px; display: flex; justify-content: center; gap: 24px; }
-
         .bottom-links a { color: #a855f7; text-decoration: none; font-size: 14px; }
         .bottom-links a:hover { text-decoration: underline; }
     </style>
@@ -204,9 +261,30 @@
 
         <div class="welcome">Привет, <span>{{ username }}</span>! Готов к дуэли?</div>
 
+        <!-- Выбор сложности -->
+        <div class="difficulty-select">
+            <div class="difficulty-label">Выбери сложность задачи:</div>
+            <div class="difficulty-buttons">
+                <button class="btn-diff active" data-diff="easy">
+                    🟢 Лёгкая
+                    <span>+25 / -50</span>
+                </button>
+                <button class="btn-diff" data-diff="medium">
+                    🟡 Средняя
+                    <span>+50 / -25</span>
+                </button>
+                <button class="btn-diff" data-diff="hard">
+                    🔴 Сложная
+                    <span>+100 / -10</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Поиск соперника -->
         <div id="searching-box">
             <div class="searching-title">🔍 Ищем соперника...</div>
             <div class="searching-dots">● ● ●</div>
+            <div class="searching-diff" id="searching-diff"></div>
             <div class="searching-timer" id="search-timer">0 сек</div>
         </div>
 
@@ -234,16 +312,30 @@
     const username = "{{ username }}";
     let searchTimer = null;
     let searchSeconds = 0;
+    let selectedDifficulty = 'easy';
+
+    // Выбор сложности
+    document.querySelectorAll('.btn-diff').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.btn-diff').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            selectedDifficulty = this.dataset.diff;
+        });
+    });
 
     function showError(msg) {
         document.getElementById('error').textContent = msg;
     }
 
+    // Найти соперника
     document.getElementById('btn-find').addEventListener('click', function() {
         document.getElementById('searching-box').style.display = 'block';
         document.getElementById('btn-find').style.display = 'none';
         document.getElementById('btn-cancel').style.display = 'block';
         document.getElementById('error').textContent = '';
+
+        const diffLabels = { easy: '🟢 Лёгкая', medium: '🟡 Средняя', hard: '🔴 Сложная' };
+        document.getElementById('searching-diff').textContent = 'Сложность: ' + (diffLabels[selectedDifficulty] || selectedDifficulty);
 
         searchSeconds = 0;
         searchTimer = setInterval(function() {
@@ -251,7 +343,7 @@
             document.getElementById('search-timer').textContent = searchSeconds + ' сек';
         }, 1000);
 
-        socket.emit('find_match', { username: username });
+        socket.emit('find_match', { username: username, difficulty: selectedDifficulty });
     });
 
     document.getElementById('btn-cancel').addEventListener('click', function() {
@@ -266,10 +358,12 @@
         document.getElementById('btn-cancel').style.display = 'none';
     }
 
+    // Создать комнату с другом
     document.getElementById('btn-create').addEventListener('click', function() {
-        socket.emit('create_room', { username: username });
+        socket.emit('create_room', { username: username, difficulty: selectedDifficulty });
     });
 
+    // Войти в комнату
     document.getElementById('btn-join').addEventListener('click', function() {
         const room_id = document.getElementById('room_code').value.trim();
         if (!room_id) return showError('Введи код комнаты!');
