@@ -1,131 +1,168 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Code Duel — Регистрация</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<title>Code Duel — Регистрация</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-        body {
-            background: #0f0f1a;
-            color: #ffffff;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .container {
-            width: 400px;
-            padding: 40px;
-            background: #1e1e2e;
-            border-radius: 16px;
-            border: 1px solid #333;
-        }
+:root {
+    --bg: #14110f;
+    --bg-raised: #1c1815;
+    --bg-input: #221d19;
+    --line: #34302a;
+    --text: #f2ede4;
+    --text-dim: #8a8278;
+    --ember: #ff7a3d;
+    --gold: #ffc14d;
+    --ok: #6fd98c;
+}
 
-        .logo {
-            text-align: center;
-            font-size: 32px;
-            font-weight: bold;
-            background: linear-gradient(90deg, #ff6b6b, #a855f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
-        }
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image:
+        radial-gradient(circle at 15% 20%, rgba(255,122,61,0.05), transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(255,193,77,0.05), transparent 40%);
+}
 
-        .subtitle {
-            text-align: center;
-            color: #888;
-            margin-bottom: 32px;
-            font-size: 15px;
-        }
+.card {
+    width: 380px;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 40px 36px;
+}
 
-        label {
-            display: block;
-            font-size: 13px;
-            color: #888;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 22px;
+    margin-bottom: 6px;
+}
 
-        input {
-            width: 100%;
-            padding: 12px 16px;
-            background: #13131f;
-            border: 1px solid #333;
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
-            margin-bottom: 16px;
-            outline: none;
-        }
+.logo-mark {
+    width: 30px;
+    height: 30px;
+    background: var(--ember);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--bg);
+}
 
-        input:focus { border-color: #a855f7; }
+.eyebrow {
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+}
 
-        button {
-            width: 100%;
-            padding: 13px;
-            background: linear-gradient(90deg, #ff6b6b, #a855f7);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 8px;
-            transition: opacity 0.2s;
-        }
+.error {
+    background: rgba(255, 122, 61, 0.1);
+    border: 1px solid var(--ember);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--ember);
+    font-size: 13px;
+    margin-bottom: 18px;
+    text-align: center;
+}
 
-        button:hover { opacity: 0.85; }
+label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
 
-        .error {
-            background: rgba(255, 107, 107, 0.1);
-            border: 1px solid #ff6b6b;
-            border-radius: 8px;
-            padding: 10px 14px;
-            color: #ff6b6b;
-            font-size: 14px;
-            margin-bottom: 16px;
-        }
+input {
+    width: 100%;
+    padding: 13px 16px;
+    background: var(--bg-input);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    margin-bottom: 18px;
+    outline: none;
+}
 
-        .bottom {
-            text-align: center;
-            margin-top: 24px;
-            color: #888;
-            font-size: 14px;
-        }
+input:focus { border-color: var(--ok); }
 
-        .bottom a {
-            color: #a855f7;
-            text-decoration: none;
-        }
+button {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--ok), #4cb874);
+    border: none;
+    border-radius: 12px;
+    color: #0c2415;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: transform 0.12s;
+}
 
-        .bottom a:hover { text-decoration: underline; }
-    </style>
+button:hover { transform: translateY(-1px); }
+
+.bottom {
+    text-align: center;
+    margin-top: 24px;
+    color: var(--text-dim);
+    font-size: 13px;
+}
+
+.bottom a {
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.bottom a:hover { text-decoration: underline; }
+</style>
 </head>
 <body>
-<div class="container">
-    <div class="logo">⚔️ Code Duel</div>
-    <div class="subtitle">Создай аккаунт</div>
+<div class="card">
+    <div class="logo"><div class="logo-mark">⚔</div>Code Duel</div>
+    <div class="eyebrow">ranked 1v1 · регистрация</div>
 
     {% if error %}
     <div class="error">{{ error }}</div>
     {% endif %}
 
     <form method="POST">
-        <label>Никнейм</label>
-        <input type="text" name="username" placeholder="Придумай никнейм" autofocus maxlength="20"/>
+        <label>никнейм</label>
+        <input type="text" name="username" placeholder="придумай никнейм" autofocus maxlength="20"/>
 
-        <label>Пароль</label>
-        <input type="password" name="password" placeholder="Придумай пароль"/>
+        <label>пароль</label>
+        <input type="password" name="password" placeholder="придумай пароль"/>
 
-        <button type="submit">Создать аккаунт</button>
+        <button type="submit">создать боеца →</button>
     </form>
 
     <div class="bottom">
-        Уже есть аккаунт? <a href="/login">Войти</a>
+        уже есть аккаунт? <a href="/login">войти</a>
     </div>
 </div>
 </body>

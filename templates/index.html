@@ -1,341 +1,429 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Code Duel</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<title>Code Duel</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-        body {
-            background: #0f0f1a;
-            color: #ffffff;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 32px;
-            background: #1e1e2e;
-            border-bottom: 1px solid #333;
-        }
+:root {
+    --bg: #14110f;
+    --bg-raised: #1c1815;
+    --bg-input: #221d19;
+    --line: #34302a;
+    --text: #f2ede4;
+    --text-dim: #8a8278;
+    --ember: #ff7a3d;
+    --gold: #ffc14d;
+    --ok: #6fd98c;
+}
 
-        .logo {
-            font-size: 22px;
-            font-weight: bold;
-            background: linear-gradient(90deg, #ff6b6b, #a855f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .nav { display: flex; gap: 16px; align-items: center; }
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    background-image:
+        radial-gradient(circle at 15% 20%, rgba(255,122,61,0.04), transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(255,193,77,0.04), transparent 40%);
+}
 
-        .nav a {
-            color: #aaa;
-            text-decoration: none;
-            font-size: 15px;
-            padding: 6px 14px;
-            border-radius: 6px;
-            transition: background 0.2s;
-        }
+.mono { font-family: 'IBM Plex Mono', monospace; }
 
-        .nav a:hover { background: #2a2a3e; color: white; }
-        .nav .username { color: #a855f7; font-weight: bold; font-size: 15px; }
-        .nav .logout { color: #ff6b6b; border: 1px solid #ff6b6b; }
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 40px;
+}
 
-        .main {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+.logo {
+    font-weight: 700;
+    font-size: 21px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-        .container {
-            text-align: center;
-            width: 440px;
-            padding: 20px;
-        }
+.logo-mark {
+    width: 28px;
+    height: 28px;
+    background: var(--ember);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--bg);
+}
 
-        h1 {
-            font-size: 48px;
-            background: linear-gradient(90deg, #ff6b6b, #a855f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-        }
+.nav { display: flex; gap: 24px; align-items: center; }
 
-        .subtitle { color: #888; margin-bottom: 24px; font-size: 16px; }
+.nav a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
 
-        .welcome {
-            background: #1e1e2e;
-            border: 1px solid #333;
-            border-radius: 10px;
-            padding: 12px 20px;
-            margin-bottom: 20px;
-            color: #ccc;
-            font-size: 15px;
-        }
+.nav a:hover { color: var(--text); }
 
-        .welcome span { color: #a855f7; font-weight: bold; }
+.nav .rank-pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    padding: 7px 14px;
+    border-radius: 100px;
+    color: var(--gold);
+}
 
-        /* Выбор сложности */
-        .difficulty-select { margin-bottom: 16px; }
+.hero {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 30px 24px 40px;
+    text-align: center;
+}
 
-        .difficulty-label {
-            color: #888;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-            text-align: left;
-        }
+.hero-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ember);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
 
-        .difficulty-buttons { display: flex; gap: 8px; }
+.hero h1 {
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 12px;
+}
 
-        .btn-diff {
-            flex: 1;
-            padding: 12px 8px;
-            background: #1e1e2e;
-            border: 1px solid #333;
-            border-radius: 8px;
-            color: #aaa;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            width: auto;
-            margin-bottom: 0;
-        }
+.hero h1 span { color: var(--ember); }
 
-        .btn-diff span {
-            font-size: 11px;
-            color: #666;
-            font-weight: normal;
-        }
+.hero-sub {
+    color: var(--text-dim);
+    font-size: 15px;
+    margin-bottom: 36px;
+}
 
-        .btn-diff:hover { border-color: #a855f7; color: white; }
+.ladder {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 8px;
+    margin-bottom: 40px;
+    height: 90px;
+}
 
-        .btn-diff.active[data-diff="easy"] {
-            border-color: #4ade80;
-            color: #4ade80;
-            background: rgba(74, 222, 128, 0.1);
-        }
+.ladder-step {
+    width: 60px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    transition: all 0.25s ease;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    opacity: 0.4;
+}
 
-        .btn-diff.active[data-diff="easy"] span { color: #4ade80; opacity: 0.7; }
+.ladder-step.s1 { height: 40%; }
+.ladder-step.s2 { height: 65%; }
+.ladder-step.s3 { height: 100%; }
 
-        .btn-diff.active[data-diff="medium"] {
-            border-color: #fbbf24;
-            color: #fbbf24;
-            background: rgba(251, 191, 36, 0.1);
-        }
+.ladder-step.lit {
+    opacity: 1;
+    transform: translateY(-6px);
+}
 
-        .btn-diff.active[data-diff="medium"] span { color: #fbbf24; opacity: 0.7; }
+.ladder-step.lit.s1 { color: var(--ok); border-color: var(--ok); box-shadow: 0 0 0 1px var(--ok) inset; }
+.ladder-step.lit.s2 { color: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
+.ladder-step.lit.s3 {
+    color: var(--ember);
+    border-color: var(--ember);
+    box-shadow: 0 0 0 1px var(--ember) inset;
+    background: linear-gradient(180deg, rgba(255,122,61,0.18), var(--bg-raised));
+}
 
-        .btn-diff.active[data-diff="hard"] {
-            border-color: #f87171;
-            color: #f87171;
-            background: rgba(248, 113, 113, 0.1);
-        }
+.diff-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+}
 
-        .btn-diff.active[data-diff="hard"] span { color: #f87171; opacity: 0.7; }
+.diff-card {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+}
 
-        input {
-            width: 100%;
-            padding: 12px 16px;
-            background: #1e1e2e;
-            border: 1px solid #333;
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
-            margin-bottom: 12px;
-            outline: none;
-        }
+.diff-card:hover { border-color: var(--text-dim); }
 
-        input:focus { border-color: #a855f7; }
+.diff-card.active { background: var(--bg-input); }
 
-        button {
-            width: 100%;
-            padding: 13px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 10px;
-            transition: opacity 0.2s;
-        }
+.diff-card[data-d="easy"].active { border-color: var(--ok); box-shadow: 0 0 0 1px var(--ok) inset; }
+.diff-card[data-d="medium"].active { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
+.diff-card[data-d="hard"].active { border-color: var(--ember); box-shadow: 0 0 0 1px var(--ember) inset; }
 
-        button:hover { opacity: 0.85; }
+.diff-icon { font-size: 18px; margin-bottom: 10px; display: block; }
+.diff-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.diff-card[data-d="easy"] .diff-title { color: var(--ok); }
+.diff-card[data-d="medium"] .diff-title { color: var(--gold); }
+.diff-card[data-d="hard"] .diff-title { color: var(--ember); }
+.diff-stake { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-dim); }
 
-        .btn-find {
-            background: linear-gradient(90deg, #ff6b6b, #a855f7);
-            color: white;
-            font-size: 18px;
-            padding: 16px;
-        }
+.cta-main {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, var(--ember), #ff5e3d);
+    color: #1a0f08;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: transform 0.12s;
+}
 
-        .btn-create {
-            background: #1e1e2e;
-            color: white;
-            border: 1px solid #a855f7;
-        }
+.cta-main:hover { transform: translateY(-1px); }
+.cta-main:active { transform: translateY(0); }
 
-        .btn-join {
-            background: #1e1e2e;
-            color: white;
-            border: 1px solid #555;
-        }
+.cta-cancel {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid var(--ember);
+    color: var(--ember);
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 16px;
+    display: none;
+}
 
-        .btn-cancel {
-            background: #2a2a3e;
-            color: #ff6b6b;
-            border: 1px solid #ff6b6b;
-            display: none;
-        }
+.searching-box {
+    display: none;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 16px;
+    text-align: center;
+}
 
-        .divider { color: #444; margin: 16px 0; font-size: 14px; }
+.searching-dots {
+    font-size: 22px;
+    letter-spacing: 6px;
+    color: var(--ember);
+    animation: pulse 1.5s infinite;
+}
 
-        #error { color: #ff6b6b; margin-top: 10px; font-size: 14px; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-        #searching-box {
-            display: none;
-            background: #1e1e2e;
-            border: 1px solid #a855f7;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 12px;
-        }
+.searching-meta {
+    margin-top: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+}
 
-        .searching-title { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
+.alt-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 22px 0;
+}
 
-        .searching-dots {
-            font-size: 28px;
-            letter-spacing: 6px;
-            color: #a855f7;
-            animation: pulse 1.5s infinite;
-        }
+.alt-row .line { flex: 1; height: 1px; background: var(--line); }
+.alt-row span { font-size: 12px; color: var(--text-dim); }
 
-        .searching-diff {
-            margin-top: 8px;
-            font-size: 13px;
-            color: #888;
-        }
+.split-actions { display: flex; gap: 10px; }
 
-        .searching-timer { color: #888; font-size: 14px; margin-top: 4px; }
+.btn-ghost {
+    flex: 1;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    color: var(--text);
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+}
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
+.btn-ghost:hover { background: var(--bg-raised); }
 
-        .bottom-links { margin-top: 24px; display: flex; justify-content: center; gap: 24px; }
-        .bottom-links a { color: #a855f7; text-decoration: none; font-size: 14px; }
-        .bottom-links a:hover { text-decoration: underline; }
-    </style>
+.room-input {
+    flex: 1;
+    padding: 14px;
+    background: var(--bg-input);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    outline: none;
+    text-align: center;
+}
+
+.room-input::placeholder { color: var(--text-dim); }
+.room-input:focus { border-color: var(--ember); }
+
+.error-text {
+    color: var(--ember);
+    font-size: 13px;
+    text-align: center;
+    margin-top: 8px;
+    min-height: 18px;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    margin-top: 24px;
+}
+
+.footer-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.footer-links a:hover { color: var(--gold); }
+</style>
 </head>
 <body>
 
 <div class="header">
-    <div class="logo">⚔️ Code Duel</div>
+    <div class="logo">
+        <div class="logo-mark">⚔</div>
+        Code Duel
+    </div>
     <div class="nav">
-        <span class="username">👤 {{ username }}</span>
-        <a href="/profile/{{ username }}">Профиль</a>
-        <a href="/leaderboard">🏆 Рейтинг</a>
-        <a href="/logout" class="logout">Выйти</a>
+        <span class="rank-pill">★ {{ username }}</span>
+        <a href="/profile/{{ username }}">профиль</a>
+        <a href="/leaderboard">рейтинг</a>
+        <a href="/logout">выйти</a>
     </div>
 </div>
 
-<div class="main">
-    <div class="container">
-        <h1>⚔️ Code Duel</h1>
-        <p class="subtitle">Сразись в программировании с реальным соперником</p>
+<div class="hero">
+    <div class="hero-eyebrow">ranked 1v1 · live</div>
+    <h1>Докажи, что ты<br><span>сильнейший</span> кодер</h1>
+    <p class="hero-sub">Привет, {{ username }} — выбери ставку и иди в бой</p>
 
-        <div class="welcome">Привет, <span>{{ username }}</span>! Готов к дуэли?</div>
+    <div class="ladder">
+        <div class="ladder-step s1 mono" data-step="easy">easy</div>
+        <div class="ladder-step s2 mono" data-step="medium">med</div>
+        <div class="ladder-step s3 mono" data-step="hard">hard</div>
+    </div>
 
-        <!-- Выбор сложности -->
-        <div class="difficulty-select">
-            <div class="difficulty-label">Выбери сложность задачи:</div>
-            <div class="difficulty-buttons">
-                <button class="btn-diff active" data-diff="easy">
-                    🟢 Лёгкая
-                    <span>+25 / -50</span>
-                </button>
-                <button class="btn-diff" data-diff="medium">
-                    🟡 Средняя
-                    <span>+50 / -25</span>
-                </button>
-                <button class="btn-diff" data-diff="hard">
-                    🔴 Сложная
-                    <span>+100 / -10</span>
-                </button>
-            </div>
+    <div class="diff-cards">
+        <div class="diff-card active" data-d="easy">
+            <span class="diff-icon">🟢</span>
+            <div class="diff-title">Easy</div>
+            <div class="diff-stake">+25 win · −50 loss</div>
         </div>
-
-        <!-- Поиск соперника -->
-        <div id="searching-box">
-            <div class="searching-title">🔍 Ищем соперника...</div>
-            <div class="searching-dots">● ● ●</div>
-            <div class="searching-diff" id="searching-diff"></div>
-            <div class="searching-timer" id="search-timer">0 сек</div>
+        <div class="diff-card" data-d="medium">
+            <span class="diff-icon">🟡</span>
+            <div class="diff-title">Medium</div>
+            <div class="diff-stake">+50 win · −25 loss</div>
         </div>
-
-        <button class="btn-find" id="btn-find">🎮 Найти соперника</button>
-        <button class="btn-cancel" id="btn-cancel">✕ Отменить поиск</button>
-
-        <div class="divider">— или играй с другом —</div>
-
-        <button class="btn-create" id="btn-create">🚀 Создать комнату</button>
-
-        <input type="text" id="room_code" placeholder="Код комнаты" maxlength="8"/>
-        <button class="btn-join" id="btn-join">⚔️ Войти в комнату</button>
-
-        <div id="error"></div>
-
-        <div class="bottom-links">
-            <a href="/leaderboard">🏆 Таблица лидеров</a>
-            <a href="/profile/{{ username }}">👤 Мой профиль</a>
+        <div class="diff-card" data-d="hard">
+            <span class="diff-icon">🔴</span>
+            <div class="diff-title">Hard</div>
+            <div class="diff-stake">+100 win · −10 loss</div>
         </div>
+    </div>
+
+    <div class="searching-box" id="searching-box">
+        <div class="searching-dots">● ● ●</div>
+        <div class="searching-meta" id="searching-meta">ищем соперника на easy...</div>
+        <div class="searching-meta" id="search-timer">0 сек</div>
+    </div>
+
+    <button class="cta-main" id="btn-find">⚡ найти соперника</button>
+    <button class="cta-cancel" id="btn-cancel">✕ отменить поиск</button>
+
+    <div class="alt-row">
+        <div class="line"></div>
+        <span>или сыграй с другом</span>
+        <div class="line"></div>
+    </div>
+
+    <div class="split-actions">
+        <button class="btn-ghost" id="btn-create">создать комнату</button>
+        <input class="room-input" id="room_code" placeholder="код комнаты" maxlength="8" />
+    </div>
+    <button class="btn-ghost" id="btn-join" style="width: 100%; margin-top: 10px;">войти в комнату</button>
+
+    <div class="error-text" id="error"></div>
+
+    <div class="footer-links">
+        <a href="/leaderboard">таблица лидеров</a>
+        <a href="/profile/{{ username }}">мой профиль</a>
     </div>
 </div>
 
 <script>
     const socket = io();
     const username = "{{ username }}";
+    let selectedDifficulty = 'easy';
     let searchTimer = null;
     let searchSeconds = 0;
-    let selectedDifficulty = 'easy';
 
-    // Выбор сложности
-    document.querySelectorAll('.btn-diff').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.btn-diff').forEach(b => b.classList.remove('active'));
+    function syncLadder(diff) {
+        document.querySelectorAll('.ladder-step').forEach(step => {
+            step.classList.toggle('lit', step.dataset.step === diff);
+        });
+    }
+
+    document.querySelectorAll('.diff-card').forEach(b => {
+        b.addEventListener('click', function() {
+            document.querySelectorAll('.diff-card').forEach(x => x.classList.remove('active'));
             this.classList.add('active');
-            selectedDifficulty = this.dataset.diff;
+            selectedDifficulty = this.dataset.d;
+            syncLadder(selectedDifficulty);
         });
     });
+
+    syncLadder('easy');
 
     function showError(msg) {
         document.getElementById('error').textContent = msg;
     }
 
-    // Найти соперника
     document.getElementById('btn-find').addEventListener('click', function() {
         document.getElementById('searching-box').style.display = 'block';
         document.getElementById('btn-find').style.display = 'none';
         document.getElementById('btn-cancel').style.display = 'block';
         document.getElementById('error').textContent = '';
 
-        const diffLabels = { easy: '🟢 Лёгкая', medium: '🟡 Средняя', hard: '🔴 Сложная' };
-        document.getElementById('searching-diff').textContent = 'Сложность: ' + (diffLabels[selectedDifficulty] || selectedDifficulty);
+        const labels = { easy: 'easy', medium: 'medium', hard: 'hard' };
+        document.getElementById('searching-meta').textContent = 'ищем соперника на ' + labels[selectedDifficulty] + '...';
 
         searchSeconds = 0;
         searchTimer = setInterval(function() {
@@ -358,12 +446,10 @@
         document.getElementById('btn-cancel').style.display = 'none';
     }
 
-    // Создать комнату с другом
     document.getElementById('btn-create').addEventListener('click', function() {
         socket.emit('create_room', { username: username, difficulty: selectedDifficulty });
     });
 
-    // Войти в комнату
     document.getElementById('btn-join').addEventListener('click', function() {
         const room_id = document.getElementById('room_code').value.trim();
         if (!room_id) return showError('Введи код комнаты!');
