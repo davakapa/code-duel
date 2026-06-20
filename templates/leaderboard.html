@@ -1,194 +1,221 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Code Duel — Рейтинг</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<title>Code Duel — Рейтинг</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-        body {
-            background: #0f0f1a;
-            color: #ffffff;
-            font-family: 'Segoe UI', sans-serif;
-            min-height: 100vh;
-        }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 32px;
-            background: #1e1e2e;
-            border-bottom: 1px solid #333;
-        }
+:root {
+    --bg: #14110f;
+    --bg-raised: #1c1815;
+    --bg-input: #221d19;
+    --line: #34302a;
+    --text: #f2ede4;
+    --text-dim: #8a8278;
+    --ember: #ff7a3d;
+    --gold: #ffc14d;
+    --ok: #6fd98c;
+    --loss: #ff5e5e;
+}
 
-        .logo {
-            font-size: 22px;
-            font-weight: bold;
-            background: linear-gradient(90deg, #ff6b6b, #a855f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-decoration: none;
-        }
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    background-image:
+        radial-gradient(circle at 15% 10%, rgba(255,122,61,0.04), transparent 40%),
+        radial-gradient(circle at 85% 90%, rgba(255,193,77,0.04), transparent 40%);
+}
 
-        .nav { display: flex; gap: 16px; }
+.mono { font-family: 'IBM Plex Mono', monospace; }
 
-        .nav a {
-            color: #aaa;
-            text-decoration: none;
-            font-size: 15px;
-            padding: 6px 14px;
-            border-radius: 6px;
-            transition: background 0.2s;
-        }
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 40px;
+}
 
-        .nav a:hover { background: #2a2a3e; color: white; }
+.logo {
+    font-weight: 700;
+    font-size: 21px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text);
+}
 
-        .container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
+.logo-mark {
+    width: 28px;
+    height: 28px;
+    background: var(--ember);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--bg);
+}
 
-        h1 {
-            font-size: 32px;
-            margin-bottom: 8px;
-        }
+.nav { display: flex; gap: 24px; align-items: center; }
 
-        .subtitle {
-            color: #888;
-            margin-bottom: 32px;
-        }
+.nav a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
 
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+.nav a:hover { color: var(--text); }
 
-        .table th {
-            text-align: left;
-            padding: 12px 16px;
-            color: #888;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 1px solid #333;
-        }
+.page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 20px 24px 60px;
+}
 
-        .table td {
-            padding: 14px 16px;
-            border-bottom: 1px solid #222;
-            font-size: 15px;
-        }
+.page-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ember);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
 
-        .table tr:hover td { background: #1a1a2e; }
+.page h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
 
-        .rank {
-            font-weight: bold;
-            color: #888;
-            width: 40px;
-        }
+.page-sub {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-bottom: 32px;
+}
 
-        .rank-1 { color: #ffd700; font-size: 20px; }
-        .rank-2 { color: #c0c0c0; font-size: 18px; }
-        .rank-3 { color: #cd7f32; font-size: 18px; }
+.board {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+}
 
-        .username a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
+.board-head {
+    display: grid;
+    grid-template-columns: 50px 1fr 90px 70px 70px 70px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
 
-        .username a:hover { color: #a855f7; }
+.board-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 90px 70px 70px 70px;
+    padding: 16px 20px;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.15s;
+}
 
-        .rating {
-            color: #a855f7;
-            font-weight: bold;
-            font-size: 16px;
-        }
+.board-row:last-child { border-bottom: none; }
+.board-row:hover { background: var(--bg-input); }
 
-        .wins { color: #4ade80; }
-        .losses { color: #f87171; }
+.rank-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    color: var(--text-dim);
+}
 
-        .winrate {
-            color: #aaa;
-            font-size: 14px;
-        }
+.board-row:nth-child(2) .rank-num { color: var(--gold); }
 
-        .empty {
-            text-align: center;
-            padding: 60px;
-            color: #555;
-            font-size: 18px;
-        }
+.player-name { font-weight: 600; font-size: 15px; }
 
-        .btn-play {
-            display: inline-block;
-            margin-top: 32px;
-            padding: 12px 28px;
-            background: linear-gradient(90deg, #ff6b6b, #a855f7);
-            border-radius: 8px;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 16px;
-        }
-    </style>
+.rating-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    color: var(--ember);
+}
+
+.win-val { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--ok); }
+.loss-val { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--loss); }
+.wr-val { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--text-dim); }
+
+.empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+}
+
+.cta-main {
+    display: inline-block;
+    margin-top: 32px;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, var(--ember), #ff5e3d);
+    color: #1a0f08;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+}
+</style>
 </head>
 <body>
 
 <div class="header">
-    <a class="logo" href="/">⚔️ Code Duel</a>
+    <a class="logo" href="/"><div class="logo-mark">⚔</div>Code Duel</a>
     <div class="nav">
-        <a href="/">🏠 Главная</a>
-        <a href="/leaderboard">🏆 Рейтинг</a>
+        <a href="/">главная</a>
+        <a href="/leaderboard">рейтинг</a>
     </div>
 </div>
 
-<div class="container">
-    <h1>🏆 Таблица лидеров</h1>
-    <p class="subtitle">Топ игроков по рейтингу</p>
+<div class="page">
+    <div class="page-eyebrow">global ranking</div>
+    <h1>Таблица лидеров</h1>
+    <p class="page-sub">Лучшие бойцы по рейтингу</p>
 
     {% if players %}
-    <table class="table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Игрок</th>
-                <th>Рейтинг</th>
-                <th>Победы</th>
-                <th>Поражения</th>
-                <th>Винрейт</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for player in players %}
-            <tr>
-                <td class="rank">
-                    {% if loop.index == 1 %}🥇
-                    {% elif loop.index == 2 %}🥈
-                    {% elif loop.index == 3 %}🥉
-                    {% else %}{{ loop.index }}
-                    {% endif %}
-                </td>
-                <td class="username">
-                    <a href="/profile/{{ player.username }}">{{ player.username }}</a>
-                </td>
-                <td class="rating">{{ player.rating }}</td>
-                <td class="wins">{{ player.wins }}W</td>
-                <td class="losses">{{ player.losses }}L</td>
-                <td class="winrate">{{ player.winrate }}%</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="board">
+        <div class="board-head">
+            <span>#</span>
+            <span>игрок</span>
+            <span>рейтинг</span>
+            <span>победы</span>
+            <span>пораж.</span>
+            <span>винрейт</span>
+        </div>
+        {% for player in players %}
+        <a href="/profile/{{ player.username }}" class="board-row">
+            <span class="rank-num">{{ loop.index }}</span>
+            <span class="player-name">{{ player.username }}</span>
+            <span class="rating-val">{{ player.rating }}</span>
+            <span class="win-val">{{ player.wins }}W</span>
+            <span class="loss-val">{{ player.losses }}L</span>
+            <span class="wr-val">{{ player.winrate }}%</span>
+        </a>
+        {% endfor %}
+    </div>
     {% else %}
-    <div class="empty">
-        Пока никто не играл 😔<br>Будь первым!
+    <div class="board">
+        <div class="empty">пока никто не играл — стань первым</div>
     </div>
     {% endif %}
 
-    <a class="btn-play" href="/">⚔️ Сыграть дуэль</a>
+    <a class="cta-main" href="/">⚡ сыграть дуэль</a>
 </div>
 
 </body>

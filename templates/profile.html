@@ -1,289 +1,269 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Code Duel — Профиль</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<title>Code Duel — Профиль</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-        body {
-            background: #0f0f1a;
-            color: #ffffff;
-            font-family: 'Segoe UI', sans-serif;
-            min-height: 100vh;
-        }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 32px;
-            background: #1e1e2e;
-            border-bottom: 1px solid #333;
-        }
+:root {
+    --bg: #14110f;
+    --bg-raised: #1c1815;
+    --bg-input: #221d19;
+    --line: #34302a;
+    --text: #f2ede4;
+    --text-dim: #8a8278;
+    --ember: #ff7a3d;
+    --gold: #ffc14d;
+    --ok: #6fd98c;
+    --loss: #ff5e5e;
+}
 
-        .logo {
-            font-size: 22px;
-            font-weight: bold;
-            background: linear-gradient(90deg, #ff6b6b, #a855f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-decoration: none;
-        }
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    background-image:
+        radial-gradient(circle at 15% 10%, rgba(255,122,61,0.04), transparent 40%),
+        radial-gradient(circle at 85% 90%, rgba(255,193,77,0.04), transparent 40%);
+}
 
-        .nav { display: flex; gap: 16px; }
+.mono { font-family: 'IBM Plex Mono', monospace; }
 
-        .nav a {
-            color: #aaa;
-            text-decoration: none;
-            font-size: 15px;
-            padding: 6px 14px;
-            border-radius: 6px;
-            transition: background 0.2s;
-        }
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 40px;
+}
 
-        .nav a:hover { background: #2a2a3e; color: white; }
+.logo {
+    font-weight: 700;
+    font-size: 21px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text);
+}
 
-        .container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
+.logo-mark {
+    width: 28px;
+    height: 28px;
+    background: var(--ember);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--bg);
+}
 
-        /* Карточка профиля */
-        .profile-card {
-            background: #1e1e2e;
-            border-radius: 16px;
-            padding: 32px;
-            display: flex;
-            align-items: center;
-            gap: 32px;
-            margin-bottom: 32px;
-            border: 1px solid #333;
-        }
+.nav { display: flex; gap: 24px; align-items: center; }
 
-        .avatar {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #ff6b6b, #a855f7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
+.nav a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
 
-        .profile-info { flex: 1; }
+.nav a:hover { color: var(--text); }
 
-        .profile-name {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
+.page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 20px 24px 60px;
+}
 
-        .profile-rating {
-            font-size: 18px;
-            color: #a855f7;
-            margin-bottom: 16px;
-        }
+.profile-card {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 32px;
+}
 
-        .stats {
-            display: flex;
-            gap: 24px;
-        }
+.avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ember), #ff5e3d);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: 700;
+    color: #1a0f08;
+    flex-shrink: 0;
+}
 
-        .stat {
-            text-align: center;
-        }
+.profile-info { flex: 1; }
 
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-        }
+.profile-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
 
-        .stat-label {
-            font-size: 12px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+.profile-rating {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    color: var(--gold);
+    margin-bottom: 16px;
+}
 
-        .stat-wins .stat-value { color: #4ade80; }
-        .stat-losses .stat-value { color: #f87171; }
-        .stat-winrate .stat-value { color: #facc15; }
+.stats { display: flex; gap: 24px; }
 
-        /* Прогресс бар рейтинга */
-        .rating-bar {
-            margin-top: 16px;
-        }
+.stat-item { text-align: center; }
 
-        .rating-bar-label {
-            font-size: 13px;
-            color: #888;
-            margin-bottom: 6px;
-        }
+.stat-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+}
 
-        .rating-bar-track {
-            height: 8px;
-            background: #2a2a3e;
-            border-radius: 4px;
-            overflow: hidden;
-        }
+.stat-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
 
-        .rating-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff6b6b, #a855f7);
-            border-radius: 4px;
-            transition: width 1s ease;
-        }
+.stat-win .stat-value { color: var(--ok); }
+.stat-loss .stat-value { color: var(--loss); }
+.stat-wr .stat-value { color: var(--gold); }
 
-        /* История матчей */
-        h2 {
-            font-size: 20px;
-            margin-bottom: 16px;
-            color: #ccc;
-        }
+.rating-bar-track {
+    margin-top: 16px;
+    height: 6px;
+    background: var(--bg-input);
+    border-radius: 3px;
+    overflow: hidden;
+}
 
-        .match {
-            background: #1e1e2e;
-            border-radius: 10px;
-            padding: 14px 20px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border: 1px solid #2a2a3e;
-        }
+.rating-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--ember), var(--gold));
+    border-radius: 3px;
+}
 
-        .match-result {
-            font-weight: bold;
-            font-size: 15px;
-            min-width: 90px;
-        }
+.section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+}
 
-        .match-result.win { color: #4ade80; }
-        .match-result.loss { color: #f87171; }
+.match {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 
-        .match-info {
-            flex: 1;
-            padding: 0 20px;
-        }
+.match-result {
+    font-weight: 700;
+    font-size: 14px;
+    min-width: 90px;
+    font-family: 'IBM Plex Mono', monospace;
+}
 
-        .match-task {
-            font-size: 14px;
-            color: #ccc;
-        }
+.match-result.win { color: var(--ok); }
+.match-result.loss { color: var(--loss); }
 
-        .match-opponent {
-            font-size: 13px;
-            color: #888;
-            margin-top: 2px;
-        }
+.match-info { flex: 1; padding: 0 16px; }
+.match-task { font-size: 14px; color: var(--text); }
+.match-opponent { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.match-opponent a { color: var(--gold); text-decoration: none; }
+.match-date { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-dim); }
 
-        .match-opponent a {
-            color: #a855f7;
-            text-decoration: none;
-        }
+.no-matches { text-align: center; padding: 32px; color: var(--text-dim); }
+.not-found { text-align: center; padding: 70px 20px; color: var(--text-dim); }
+.not-found h2 { font-size: 22px; margin-bottom: 12px; color: var(--text); }
 
-        .match-date {
-            font-size: 13px;
-            color: #555;
-        }
-
-        .no-matches {
-            text-align: center;
-            padding: 40px;
-            color: #555;
-            font-size: 16px;
-        }
-
-        .not-found {
-            text-align: center;
-            padding: 80px 20px;
-            color: #555;
-        }
-
-        .not-found h2 { font-size: 24px; margin-bottom: 12px; color: #888; }
-
-        .btn-play {
-            display: inline-block;
-            margin-top: 24px;
-            padding: 12px 28px;
-            background: linear-gradient(90deg, #ff6b6b, #a855f7);
-            border-radius: 8px;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 16px;
-        }
-    </style>
+.cta-main {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, var(--ember), #ff5e3d);
+    color: #1a0f08;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+}
+</style>
 </head>
 <body>
 
 <div class="header">
-    <a class="logo" href="/">⚔️ Code Duel</a>
+    <a class="logo" href="/"><div class="logo-mark">⚔</div>Code Duel</a>
     <div class="nav">
-        <a href="/">🏠 Главная</a>
-        <a href="/leaderboard">🏆 Рейтинг</a>
+        <a href="/">главная</a>
+        <a href="/leaderboard">рейтинг</a>
     </div>
 </div>
 
-<div class="container">
+<div class="page">
 
 {% if not player %}
 <div class="not-found">
-    <h2>👤 Игрок «{{ username }}» не найден</h2>
-    <p>Возможно, этот игрок ещё не играл ни одной дуэли</p>
-    <a class="btn-play" href="/">⚔️ Начать играть</a>
+    <h2>боец «{{ username }}» не найден</h2>
+    <p>возможно, этот игрок ещё не сыграл ни одной дуэли</p>
+    <a class="cta-main" href="/">⚡ начать играть</a>
 </div>
 
 {% else %}
 
-<!-- Карточка профиля -->
 <div class="profile-card">
     <div class="avatar">{{ player.username[0].upper() }}</div>
     <div class="profile-info">
         <div class="profile-name">{{ player.username }}</div>
-        <div class="profile-rating">⭐ {{ player.rating }} рейтинга</div>
+        <div class="profile-rating">★ {{ player.rating }} рейтинга</div>
         <div class="stats">
-            <div class="stat stat-wins">
+            <div class="stat-item stat-win">
                 <div class="stat-value">{{ player.wins }}</div>
-                <div class="stat-label">Победы</div>
+                <div class="stat-label">победы</div>
             </div>
-            <div class="stat stat-losses">
+            <div class="stat-item stat-loss">
                 <div class="stat-value">{{ player.losses }}</div>
-                <div class="stat-label">Поражения</div>
+                <div class="stat-label">поражения</div>
             </div>
-            <div class="stat stat-winrate">
+            <div class="stat-item stat-wr">
                 <div class="stat-value">{{ player.winrate }}%</div>
-                <div class="stat-label">Винрейт</div>
+                <div class="stat-label">винрейт</div>
             </div>
         </div>
-        <div class="rating-bar">
-            <div class="rating-bar-label">Прогресс рейтинга</div>
-            <div class="rating-bar-track">
-                <div class="rating-bar-fill" style="width: {{ [player.rating / 20, 100] | min }}%"></div>
-            </div>
+        <div class="rating-bar-track">
+            <div class="rating-bar-fill" style="width: {{ [player.rating / 20, 100] | min }}%"></div>
         </div>
     </div>
 </div>
 
-<!-- История матчей -->
-<h2>📋 Последние матчи</h2>
+<div class="section-label">последние матчи</div>
 
 {% if matches %}
 {% for match in matches %}
 <div class="match">
     {% if match.winner == player.username %}
-    <div class="match-result win">🏆 Победа</div>
+    <div class="match-result win">🏆 победа</div>
     <div class="match-info">
         <div class="match-task">{{ match.task_title }}</div>
         <div class="match-opponent">vs <a href="/profile/{{ match.loser }}">{{ match.loser }}</a></div>
     </div>
     {% else %}
-    <div class="match-result loss">😔 Поражение</div>
+    <div class="match-result loss">😔 поражение</div>
     <div class="match-info">
         <div class="match-task">{{ match.task_title }}</div>
         <div class="match-opponent">vs <a href="/profile/{{ match.winner }}">{{ match.winner }}</a></div>
@@ -293,10 +273,10 @@
 </div>
 {% endfor %}
 {% else %}
-<div class="no-matches">Матчей пока нет 🎮</div>
+<div class="no-matches">матчей пока нет</div>
 {% endif %}
 
-<a class="btn-play" href="/">⚔️ Сыграть дуэль</a>
+<a class="cta-main" href="/">⚡ сыграть дуэль</a>
 
 {% endif %}
 

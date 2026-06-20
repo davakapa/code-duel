@@ -1,363 +1,385 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Code Duel — Дуэль</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<title>Code Duel — Дуэль</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Fira+Code:wght@400;500&display=swap');
 
-        body {
-            background: #0f0f1a;
-            color: #ffffff;
-            font-family: 'Segoe UI', sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 24px;
-            background: #1e1e2e;
-            border-bottom: 1px solid #333;
-        }
+:root {
+    --bg: #14110f;
+    --bg-raised: #1c1815;
+    --bg-input: #221d19;
+    --line: #34302a;
+    --text: #f2ede4;
+    --text-dim: #8a8278;
+    --ember: #ff7a3d;
+    --gold: #ffc14d;
+    --ok: #6fd98c;
+    --loss: #ff5e5e;
+}
 
-        .logo {
-            font-size: 20px;
-            font-weight: bold;
-            background: linear-gradient(90deg, #ff6b6b, #a855f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
 
-        .timer {
-            font-size: 28px;
-            font-weight: bold;
-            color: #a855f7;
-            font-variant-numeric: tabular-nums;
-        }
+.mono { font-family: 'IBM Plex Mono', monospace; }
 
-        .timer.danger { color: #ff6b6b; }
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 28px;
+    background: var(--bg-raised);
+    border-bottom: 1px solid var(--line);
+}
 
-        .players { display: flex; gap: 20px; font-size: 14px; color: #aaa; }
+.logo {
+    font-weight: 700;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 
-        .player-tag {
-            padding: 4px 12px;
-            border-radius: 20px;
-            background: #2a2a3e;
-        }
+.logo-mark {
+    width: 24px;
+    height: 24px;
+    background: var(--ember);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--bg);
+}
 
-        .player-tag.me { border: 1px solid #a855f7; color: white; }
-        .player-tag.done { border: 1px solid #4ade80; color: #4ade80; }
+.timer {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gold);
+}
 
-        .main { display: flex; flex: 1; overflow: hidden; }
+.timer.danger { color: var(--loss); }
 
-        .task-panel {
-            width: 380px;
-            padding: 24px;
-            background: #13131f;
-            border-right: 1px solid #333;
-            overflow-y: auto;
-        }
+.players { display: flex; gap: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
 
-        .task-title { font-size: 20px; font-weight: bold; margin-bottom: 8px; }
+.player-tag {
+    padding: 5px 14px;
+    border-radius: 100px;
+    background: var(--bg-input);
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+}
 
-        .difficulty-badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+.player-tag.me { border-color: var(--ember); color: var(--ember); }
+.player-tag.done { border-color: var(--ok); color: var(--ok); }
 
-        .difficulty-easy { background: rgba(74, 222, 128, 0.15); color: #4ade80; border: 1px solid #4ade80; }
-        .difficulty-medium { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid #fbbf24; }
-        .difficulty-hard { background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid #f87171; }
+.main { display: flex; flex: 1; overflow: hidden; }
 
-        .task-desc { color: #ccc; line-height: 1.6; margin-bottom: 20px; }
+.task-panel {
+    width: 380px;
+    padding: 28px;
+    background: var(--bg-raised);
+    border-right: 1px solid var(--line);
+    overflow-y: auto;
+}
 
-        .tests-title {
-            font-size: 13px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
+.task-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
 
-        .test-case {
-            background: #1e1e2e;
-            border-radius: 8px;
-            padding: 10px 14px;
-            margin-bottom: 8px;
-            font-family: monospace;
-            font-size: 13px;
-            color: #ccc;
-        }
+.difficulty-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
 
-        .editor-panel { flex: 1; display: flex; flex-direction: column; }
+.difficulty-easy { background: rgba(111, 217, 140, 0.12); color: var(--ok); border: 1px solid var(--ok); }
+.difficulty-medium { background: rgba(255, 193, 77, 0.12); color: var(--gold); border: 1px solid var(--gold); }
+.difficulty-hard { background: rgba(255, 94, 94, 0.12); color: var(--loss); border: 1px solid var(--loss); }
 
-        textarea {
-            flex: 1;
-            background: #1a1a2e;
-            color: #e0e0ff;
-            font-family: 'Courier New', monospace;
-            font-size: 15px;
-            padding: 20px;
-            border: none;
-            outline: none;
-            resize: none;
-            line-height: 1.6;
-            tab-size: 4;
-        }
+.task-desc { color: var(--text-dim); line-height: 1.6; margin-bottom: 22px; font-size: 14px; }
 
-        .bottom-panel {
-            background: #1e1e2e;
-            border-top: 1px solid #333;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+.tests-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
 
-        .btn-submit {
-            padding: 10px 28px;
-            background: linear-gradient(90deg, #ff6b6b, #a855f7);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
+.test-case {
+    background: var(--bg-input);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 14px;
+    margin-bottom: 8px;
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+}
 
-        .btn-submit:hover { opacity: 0.85; }
-        .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+.editor-panel { flex: 1; display: flex; flex-direction: column; }
 
-        .results { display: flex; gap: 8px; flex-wrap: wrap; }
-        .result-badge { font-size: 18px; }
-        .result-text { color: #aaa; font-size: 14px; }
+textarea {
+    flex: 1;
+    background: #100d0b;
+    color: #f0ece2;
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    padding: 22px;
+    border: none;
+    outline: none;
+    resize: none;
+    line-height: 1.7;
+    tab-size: 4;
+}
 
-        /* Оверлей ожидания */
-        #waiting-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(15,15,26,0.95);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
+.bottom-panel {
+    background: var(--bg-raised);
+    border-top: 1px solid var(--line);
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
 
-        .waiting-title { font-size: 28px; font-weight: bold; margin-bottom: 12px; }
+.btn-submit {
+    padding: 12px 26px;
+    background: linear-gradient(135deg, var(--ember), #ff5e3d);
+    border: none;
+    border-radius: 10px;
+    color: #1a0f08;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.12s;
+}
 
-        .room-code-box {
-            background: #1e1e2e;
-            border: 1px solid #a855f7;
-            border-radius: 12px;
-            padding: 16px 32px;
-            margin: 16px 0;
-            text-align: center;
-        }
+.btn-submit:hover { transform: translateY(-1px); }
+.btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .room-code-label { font-size: 13px; color: #888; margin-bottom: 6px; }
+.results { display: flex; gap: 8px; flex-wrap: wrap; }
+.result-badge { font-size: 17px; }
+.result-text { font-family: 'IBM Plex Mono', monospace; color: var(--text-dim); font-size: 13px; }
 
-        .room-code {
-            font-size: 36px;
-            font-weight: bold;
-            font-family: monospace;
-            letter-spacing: 6px;
-            color: #a855f7;
-        }
+#waiting-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 17, 15, 0.96);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
 
-        .copy-btn {
-            margin-top: 10px;
-            padding: 8px 20px;
-            background: #2a2a3e;
-            border: 1px solid #555;
-            border-radius: 6px;
-            color: white;
-            cursor: pointer;
-            font-size: 14px;
-        }
+.waiting-title { font-size: 26px; font-weight: 700; margin-bottom: 16px; }
 
-        .waiting-hint { color: #666; font-size: 14px; margin-top: 8px; }
+.room-code-box {
+    background: var(--bg-raised);
+    border: 1px solid var(--ember);
+    border-radius: 16px;
+    padding: 20px 36px;
+    margin: 16px 0;
+    text-align: center;
+}
 
-        /* Красивый оверлей результата */
-        #result-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(15,15,26,0.97);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 200;
-            animation: fadeIn 0.5s ease;
-        }
+.room-code-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
+.room-code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: var(--ember);
+}
 
-        @keyframes bounceIn {
-            0% { transform: scale(0); opacity: 0; }
-            60% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(1); }
-        }
+.copy-btn {
+    margin-top: 12px;
+    padding: 9px 20px;
+    background: var(--bg-input);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'IBM Plex Mono', monospace;
+}
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+.waiting-hint { color: var(--text-dim); font-size: 13px; margin-top: 10px; }
 
-        .result-card {
-            background: #1e1e2e;
-            border-radius: 24px;
-            padding: 48px;
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-            border: 1px solid #333;
-            box-shadow: 0 0 60px rgba(168, 85, 247, 0.15);
-        }
+#result-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 17, 15, 0.97);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+    animation: fadeIn 0.4s ease;
+}
 
-        .result-emoji {
-            font-size: 80px;
-            display: block;
-            margin-bottom: 16px;
-            animation: bounceIn 0.6s ease 0.2s both;
-        }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes bounceIn {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); }
+}
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
-        .result-title {
-            font-size: 36px;
-            font-weight: bold;
-            margin-bottom: 8px;
-            animation: slideUp 0.4s ease 0.4s both;
-        }
+.result-card {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 44px;
+    text-align: center;
+    max-width: 480px;
+    width: 90%;
+}
 
-        .result-title.win { color: #4ade80; }
-        .result-title.loss { color: #f87171; }
-        .result-title.draw { color: #fbbf24; }
+.result-emoji {
+    font-size: 70px;
+    display: block;
+    margin-bottom: 14px;
+    animation: bounceIn 0.55s ease 0.15s both;
+}
 
-        .result-sub {
-            color: #aaa;
-            font-size: 16px;
-            margin-bottom: 24px;
-            animation: slideUp 0.4s ease 0.5s both;
-        }
+.result-title {
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    animation: slideUp 0.4s ease 0.35s both;
+}
 
-        .result-stats {
-            display: flex;
-            justify-content: center;
-            gap: 32px;
-            margin-bottom: 28px;
-            animation: slideUp 0.4s ease 0.6s both;
-        }
+.result-title.win { color: var(--ok); }
+.result-title.loss { color: var(--loss); }
+.result-title.draw { color: var(--gold); }
 
-        .stat-item { text-align: center; }
+.result-sub {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-bottom: 22px;
+    animation: slideUp 0.4s ease 0.45s both;
+}
 
-        .stat-value {
-            font-size: 28px;
-            font-weight: bold;
-            display: block;
-        }
+.result-stats {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    margin-bottom: 24px;
+    animation: slideUp 0.4s ease 0.55s both;
+}
 
-        .stat-label {
-            font-size: 12px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+.stat-item { text-align: center; }
 
-        .rating-change {
-            font-size: 22px;
-            font-weight: bold;
-            padding: 10px 24px;
-            border-radius: 12px;
-            margin-bottom: 28px;
-            animation: slideUp 0.4s ease 0.7s both;
-        }
+.stat-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    display: block;
+}
 
-        .rating-change.positive {
-            background: rgba(74, 222, 128, 0.15);
-            color: #4ade80;
-            border: 1px solid #4ade80;
-        }
+.stat-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
 
-        .rating-change.negative {
-            background: rgba(248, 113, 113, 0.15);
-            color: #f87171;
-            border: 1px solid #f87171;
-        }
+.rating-change {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 10px 22px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+    display: inline-block;
+    animation: slideUp 0.4s ease 0.65s both;
+}
 
-        .result-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            animation: slideUp 0.4s ease 0.8s both;
-        }
+.rating-change.positive { background: rgba(111, 217, 140, 0.12); color: var(--ok); border: 1px solid var(--ok); }
+.rating-change.negative { background: rgba(255, 94, 94, 0.12); color: var(--loss); border: 1px solid var(--loss); }
 
-        .btn-rematch {
-            padding: 12px 28px;
-            background: linear-gradient(90deg, #ff6b6b, #a855f7);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
+.result-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    animation: slideUp 0.4s ease 0.75s both;
+}
 
-        .btn-rematch:hover { opacity: 0.85; }
+.btn-rematch {
+    padding: 13px 26px;
+    background: linear-gradient(135deg, var(--ember), #ff5e3d);
+    border: none;
+    border-radius: 12px;
+    color: #1a0f08;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
 
-        .btn-home {
-            padding: 12px 28px;
-            background: #2a2a3e;
-            border: 1px solid #555;
-            border-radius: 8px;
-            color: white;
-            font-size: 15px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
+.btn-home {
+    padding: 13px 26px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 14px;
+    cursor: pointer;
+}
 
-        .btn-home:hover { background: #333; }
+.btn-home:hover { background: var(--bg-input); }
 
-        .confetti {
-            position: fixed;
-            width: 10px;
-            height: 10px;
-            border-radius: 2px;
-            animation: confettiFall linear forwards;
-            z-index: 300;
-        }
+.confetti {
+    position: fixed;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+    z-index: 300;
+}
 
-        @keyframes confettiFall {
-            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-        }
-    </style>
+@keyframes confettiFall {
+    0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+</style>
 </head>
 <body>
 
 <div id="waiting-overlay">
-    <div class="waiting-title">⏳ Ждём соперника...</div>
+    <div class="waiting-title">⏳ ждём соперника...</div>
     <div class="room-code-box">
-        <div class="room-code-label">Код комнаты — отправь другу:</div>
+        <div class="room-code-label">код комнаты — отправь другу:</div>
         <div class="room-code" id="display-room-code">——</div>
-        <button class="copy-btn" id="copy-btn">📋 Скопировать</button>
+        <button class="copy-btn" id="copy-btn">скопировать</button>
     </div>
-    <div class="waiting-hint">Как только друг введёт код — дуэль начнётся автоматически</div>
+    <div class="waiting-hint">как только друг введёт код — дуэль начнётся автоматически</div>
 </div>
 
 <div id="result-overlay">
@@ -368,30 +390,30 @@
         <div class="result-stats" id="result-stats"></div>
         <div class="rating-change" id="rating-change"></div>
         <div class="result-buttons">
-            <button class="btn-rematch" id="btn-rematch">🎮 Ещё раз</button>
-            <button class="btn-home" id="btn-home">🏠 На главную</button>
+            <button class="btn-rematch" id="btn-rematch">⚡ ещё раз</button>
+            <button class="btn-home" id="btn-home">на главную</button>
         </div>
     </div>
 </div>
 
 <div class="header">
-    <div class="logo">⚔️ Code Duel</div>
+    <div class="logo"><div class="logo-mark">⚔</div>Code Duel</div>
     <div class="timer" id="timer">05:00</div>
     <div class="players" id="players-display"></div>
 </div>
 
 <div class="main">
     <div class="task-panel">
-        <div class="task-title" id="task-title">Загрузка...</div>
+        <div class="task-title" id="task-title">загрузка...</div>
         <div id="difficulty-badge"></div>
         <div class="task-desc" id="task-desc"></div>
-        <div class="tests-title">Примеры</div>
+        <div class="tests-title">примеры</div>
         <div id="test-cases"></div>
     </div>
     <div class="editor-panel">
-        <textarea id="code-editor" placeholder="# Пиши код здесь..."></textarea>
+        <textarea id="code-editor" placeholder="# пиши код здесь..."></textarea>
         <div class="bottom-panel">
-            <button class="btn-submit" id="submit-btn">▶ Отправить решение</button>
+            <button class="btn-submit" id="submit-btn">▶ отправить решение</button>
             <div class="results" id="results-display"></div>
             <div class="result-text" id="result-text"></div>
         </div>
@@ -405,7 +427,6 @@
     const isSecondPlayer = localStorage.getItem('should_join') === 'true';
     const fromMatchmaking = localStorage.getItem('from_matchmaking') === 'true';
     let timerInterval = null;
-    let secondsLeft = 300;
     let matchStartTime = null;
     let currentTask = null;
 
@@ -419,8 +440,8 @@
 
     document.getElementById('copy-btn').addEventListener('click', function() {
         navigator.clipboard.writeText(roomId);
-        this.textContent = '✅ Скопировано!';
-        setTimeout(() => { this.textContent = '📋 Скопировать'; }, 2000);
+        this.textContent = 'скопировано!';
+        setTimeout(() => { this.textContent = 'скопировать'; }, 2000);
     });
 
     document.getElementById('submit-btn').addEventListener('click', function() {
@@ -475,7 +496,7 @@
             if (remaining <= 60) el.classList.add('danger');
             if (remaining <= 0) {
                 clearInterval(timerInterval);
-                showResult(false, 'draw', 'Время вышло!', 'Никто не успел решить задачу', null);
+                showResult(false, 'draw', 'время вышло!', 'никто не успел решить задачу', null);
             }
         }, 500);
     }
@@ -486,14 +507,14 @@
         document.getElementById('task-desc').textContent = task.description;
 
         const badge = document.getElementById('difficulty-badge');
-        const labels = { easy: '🟢 Лёгкая', medium: '🟡 Средняя', hard: '🔴 Сложная' };
+        const labels = { easy: 'easy', medium: 'medium', hard: 'hard' };
         badge.innerHTML = '<span class="difficulty-badge difficulty-' + task.difficulty + '">' + (labels[task.difficulty] || task.difficulty) + '</span>';
 
         const tc = document.getElementById('test-cases');
         tc.innerHTML = '';
         task.tests.forEach(function(t, i) {
             const args = Array.isArray(t.input) ? t.input.join(', ') : Object.values(t.input).join(', ');
-            tc.innerHTML += '<div class="test-case"><b>Тест ' + (i+1) + ':</b> solution(' + args + ') → ' + t.output + '</div>';
+            tc.innerHTML += '<div class="test-case">тест ' + (i+1) + ': solution(' + args + ') → ' + t.output + '</div>';
         });
 
         const argCount = task.tests[0].input.length;
@@ -517,7 +538,7 @@
     }
 
     function spawnConfetti() {
-        const colors = ['#ff6b6b', '#a855f7', '#4ade80', '#fbbf24', '#60a5fa'];
+        const colors = ['#ff7a3d', '#ffc14d', '#6fd98c', '#f2ede4'];
         for (let i = 0; i < 80; i++) {
             setTimeout(function() {
                 const el = document.createElement('div');
@@ -542,29 +563,27 @@
         document.getElementById('result-emoji').textContent = won ? '🏆' : (type === 'draw' ? '🤝' : '😔');
 
         const titleEl = document.getElementById('result-title');
-        titleEl.textContent = won ? '🎉 Победа!' : (type === 'draw' ? '🤝 Ничья' : title);
+        titleEl.textContent = won ? 'победа!' : (type === 'draw' ? 'ничья' : title);
         titleEl.className = 'result-title ' + (won ? 'win' : (type === 'draw' ? 'draw' : 'loss'));
 
         document.getElementById('result-sub').textContent = sub;
 
-        // Статистика
         const statsEl = document.getElementById('result-stats');
-        const diffLabels = { easy: 'Лёгкая', medium: 'Средняя', hard: 'Сложная' };
+        const diffLabels = { easy: 'easy', medium: 'medium', hard: 'hard' };
         statsEl.innerHTML = `
             <div class="stat-item">
                 <span class="stat-value">${formatTime(timeSpent)}</span>
-                <span class="stat-label">Время</span>
+                <span class="stat-label">время</span>
             </div>
             <div class="stat-item">
                 <span class="stat-value">${currentTask ? (diffLabels[currentTask.difficulty] || '—') : '—'}</span>
-                <span class="stat-label">Сложность</span>
+                <span class="stat-label">сложность</span>
             </div>
         `;
 
-        // Изменение рейтинга
         const ratingEl = document.getElementById('rating-change');
         if (ratingChange !== null && ratingChange !== undefined) {
-            ratingEl.style.display = 'block';
+            ratingEl.style.display = 'inline-block';
             ratingEl.className = 'rating-change ' + (ratingChange > 0 ? 'positive' : 'negative');
             ratingEl.textContent = (ratingChange > 0 ? '+' : '') + ratingChange + ' рейтинга';
         } else {
@@ -586,13 +605,13 @@
             const tag = document.createElement('div');
             tag.className = 'player-tag' + (p === username ? ' me' : '');
             tag.id = 'player-' + p;
-            tag.textContent = p === username ? '👤 ' + p + ' (ты)' : '⚔️ ' + p;
+            tag.textContent = (p === username ? 'ты: ' : 'vs: ') + p;
             pd.appendChild(tag);
         });
     });
 
     socket.on('rating_update', function(data) {
-        showResult(true, 'win', '', 'Ты решил задачу первым!', data.change);
+        showResult(true, 'win', '', 'ты решил задачу первым!', data.change);
     });
 
     socket.on('test_results', function(data) {
@@ -606,7 +625,7 @@
         if (tag) tag.classList.add('done');
         if (data.username !== username && data.place === 1) {
             const change = data.rating_change || -25;
-            showResult(false, 'loss', '😔 Поражение', data.username + ' решил задачу быстрее тебя', change);
+            showResult(false, 'loss', 'поражение', data.username + ' решил задачу быстрее тебя', change);
         }
     });
 
