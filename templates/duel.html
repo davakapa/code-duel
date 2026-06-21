@@ -438,6 +438,7 @@ textarea {
     </div>
     <div class="editor-panel">
         <textarea id="code-editor" placeholder="# пиши код здесь..."></textarea>
+        <input type="text" id="answer-input" class="answer-input mono" placeholder="введи ответ..." style="display:none;" />
         <div class="bottom-panel">
             <button class="btn-submit" id="submit-btn">▶ отправить решение</button>
             <div class="results" id="results-display"></div>
@@ -445,6 +446,40 @@ textarea {
         </div>
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<style>
+    .CodeMirror {
+        flex: 1;
+        height: 100% !important;
+        font-family: 'Fira Code', monospace !important;
+        font-size: 14px !important;
+        background: #100d0b !important;
+    }
+    .CodeMirror-gutters { background: #150f0c !important; border-right: 1px solid var(--line) !important; }
+    .CodeMirror-linenumber { color: var(--text-dim) !important; }
+    .cm-s-duel.CodeMirror { color: #f0ece2; }
+    .cm-s-duel .cm-keyword { color: #ff7a3d; }
+    .cm-s-duel .cm-def { color: #ffc14d; }
+    .cm-s-duel .cm-string { color: #6fd98c; }
+    .cm-s-duel .cm-number { color: #ffc14d; }
+    .cm-s-duel .cm-comment { color: #6b6258; font-style: italic; }
+    .cm-s-duel .cm-operator { color: #f0ece2; }
+    .cm-s-duel .cm-variable { color: #f0ece2; }
+    .editor-panel { display: flex; flex-direction: column; }
+    .answer-input {
+        flex: 1;
+        background: #100d0b;
+        color: #f0ece2;
+        font-size: 22px;
+        padding: 22px;
+        border: none;
+        outline: none;
+        text-align: center;
+    }
+</style>
 
 <script>
     const socket = io();
@@ -458,6 +493,16 @@ textarea {
     let roundsTotal = 1;
     let currentRound = 1;
     let currentScores = {};
+
+    const codeEditor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+        mode: 'python',
+        theme: 'duel',
+        lineNumbers: true,
+        indentUnit: 4,
+        tabSize: 4,
+        indentWithTabs: false,
+        extraKeys: { Tab: function(cm) { cm.replaceSelection('    ', 'end'); } }
+    });
 
     if (isSecondPlayer) {
         document.getElementById('waiting-overlay').style.display = 'none';
@@ -474,21 +519,14 @@ textarea {
     });
 
     document.getElementById('submit-btn').addEventListener('click', function() {
-        const code = document.getElementById('code-editor').value;
+        const isAnswerMode = currentTask && currentTask.format === 'answer';
+        const code = isAnswerMode
+            ? document.getElementById('answer-input').value
+            : codeEditor.getValue();
         if (!code.trim()) return;
         this.disabled = true;
         socket.emit('submit_code', { room_id: roomId, code: code, username: username });
         setTimeout(() => { this.disabled = false; }, 2000);
-    });
-
-    document.getElementById('code-editor').addEventListener('keydown', function(e) {
-        if (e.key === 'Tab') {
-            e.preventDefault();
-            const start = this.selectionStart;
-            const end = this.selectionEnd;
-            this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
-            this.selectionStart = this.selectionEnd = start + 4;
-        }
     });
 
     document.getElementById('btn-home').addEventListener('click', function() {
@@ -541,18 +579,53 @@ textarea {
 
         const tc = document.getElementById('test-cases');
         tc.innerHTML = '';
-        task.tests.forEach(function(t, i) {
-            const args = Array.isArray(t.input) ? t.input.join(', ') : Object.values(t.input).join(', ');
-            tc.innerHTML += '<div class="test-case">тест ' + (i+1) + ': solution(' + args + ') → ' + t.output + '</div>';
-        });
 
-        const argCount = task.tests[0].input.length;
-        let args = 'n';
-        if (argCount === 2) args = 'a, b';
-        if (argCount === 3) args = 'a, b, c';
-        if (typeof task.tests[0].input[0] === 'string') args = 's';
-        if (Array.isArray(task.tests[0].input[0])) args = 'nums';
-        document.getElementById('code-editor').value = 'def solution(' + args + '):\n    # пиши здесь\n    pass';
+        const format = task.format || 'function';
+        const editorWrapper = codeEditor.getWrapperElement();
+        const answerInput = document.getElementById('answer-input');
+
+        if (format === 'answer') {
+            task.tests.forEach(function(t, i) {
+                tc.innerHTML += '<div class="test-case">пример ' + (i+1) + ': вход = ' + JSON.stringify(t.input) + ' → ответ: ' + t.output + '</div>';
+            });
+            editorWrapper.style.display = 'none';
+            answerInput.style.display = 'block';
+            answerInput.value = '';
+            answerInput.placeholder = 'введи числовой ответ...';
+            setTimeout(() => answerInput.focus(), 100);
+
+        } else if (format === 'code') {
+            task.tests.forEach(function(t, i) {
+                const stdinPreview = (t.stdin || '').split('\n').join(' / ');
+                tc.innerHTML += '<div class="test-case">тест ' + (i+1) + ': вход «' + stdinPreview + '» → вывод: ' + t.output + '</div>';
+            });
+            if (task.input_hint) {
+                tc.innerHTML += '<div class="test-case" style="opacity:0.7;">💡 ' + task.input_hint + '</div>';
+            }
+            editorWrapper.style.display = 'block';
+            answerInput.style.display = 'none';
+            codeEditor.setValue('# напиши программу здесь\n# используй input() для чтения данных\n# и print() для вывода ответа\n');
+            setTimeout(() => codeEditor.focus(), 100);
+
+        } else {
+            task.tests.forEach(function(t, i) {
+                const args = Array.isArray(t.input) ? t.input.join(', ') : Object.values(t.input).join(', ');
+                tc.innerHTML += '<div class="test-case">тест ' + (i+1) + ': solution(' + args + ') → ' + t.output + '</div>';
+            });
+            editorWrapper.style.display = 'block';
+            answerInput.style.display = 'none';
+
+            const argCount = task.tests[0].input.length;
+            let args = 'n';
+            if (argCount === 2) args = 'a, b';
+            if (argCount === 3) args = 'a, b, c';
+            if (typeof task.tests[0].input[0] === 'string') args = 's';
+            if (Array.isArray(task.tests[0].input[0])) args = 'nums';
+            codeEditor.setValue('def solution(' + args + '):\n    # пиши здесь\n    pass');
+            setTimeout(() => codeEditor.focus(), 100);
+        }
+
+        setTimeout(() => codeEditor.refresh(), 50);
     }
 
     function getTimeSpent() {

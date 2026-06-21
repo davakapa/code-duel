@@ -714,37 +714,39 @@ TASKS = [
             {"input": [[[5,3,0,0,7,0,0,0,0],[6,0,0,1,9,5,0,0,0],[0,9,8,0,0,0,0,6,0],[8,0,0,0,6,0,0,0,3],[4,0,0,8,0,3,0,0,1],[7,0,0,0,2,0,0,0,6],[0,6,0,0,0,0,2,8,0],[0,0,0,4,1,9,0,0,5],[0,0,0,0,8,0,0,7,9]]], "output": True},
         ]
     },
-    # === ЕГЭ ПО ИНФОРМАТИКЕ ===
+    # === ЕГЭ ПО ИНФОРМАТИКЕ (в стиле и структуре реальных КИМ) ===
     {
         "id": 61,
-        "title": "ЕГЭ №1 — Системы счисления",
-        "description": "Напиши функцию solution(n), которая переводит число n из десятичной системы в восьмеричную и возвращает результат как целое число (например, 8 → 10, читается как '10' в восьмеричной).",
+        "title": "Задание 1 — Системы счисления",
+        "description": "Сколько единиц в двоичной записи числа, которое в десятичной системе равно сумме чисел A и B, если A = 2·N + 17, B = N − 5, а N даётся на вход? Запишите в ответе количество единиц.",
         "difficulty": "easy",
         "category": "ege",
+        "format": "answer",
         "tests": [
-            {"input": [8], "output": 10},
-            {"input": [64], "output": 100},
-            {"input": [15], "output": 17},
+            {"input": [10], "output": 4},
+            {"input": [20], "output": 4},
+            {"input": [50], "output": 3},
         ]
     },
     {
         "id": 62,
-        "title": "ЕГЭ №2 — Таблица истинности",
-        "description": "Напиши функцию solution(a, b, c), которая вычисляет логическое выражение (a ИЛИ b) И (НЕ c) и возвращает результат как 1 (истина) или 0 (ложь). На вход подаются 0 или 1.",
+        "title": "Задание 2 — Логическая функция",
+        "description": "Логическое выражение (x1 ∨ x2) ∧ (¬x3 ∨ x4) тождественно равно 1 при любых значениях переменных x2, x3, x4, если x1 принимает заданное значение v (0 или 1)? Дано целое v. Выведите 1, если выражение тождественно истинно при x1 = v, иначе 0.",
         "difficulty": "easy",
         "category": "ege",
+        "format": "answer",
         "tests": [
-            {"input": [1, 0, 0], "output": 1},
-            {"input": [0, 0, 1], "output": 0},
-            {"input": [0, 0, 0], "output": 0},
+            {"input": [1], "output": 1},
+            {"input": [0], "output": 0},
         ]
     },
     {
         "id": 63,
-        "title": "ЕГЭ №6 — Трассировка цикла",
-        "description": "Напиши функцию solution(n), которая имитирует работу программы: переменная s = 0, затем в цикле от i = 1 до n включительно выполняется s = s + i, если i делится на 3, иначе s = s - 1. Вернуть итоговое значение s.",
+        "title": "Задание 6 — Анализ программы (трассировка)",
+        "description": "Определите, что будет напечатано в результате выполнения программы:\n\ns = 0\nfor i in range(1, N + 1):\n    if i % 3 == 0:\n        s = s + i\n    else:\n        s = s - 1\nprint(s)\n\nНа вход подаётся значение N. Найдите итоговое значение s.",
         "difficulty": "medium",
         "category": "ege",
+        "format": "answer",
         "tests": [
             {"input": [6], "output": 6},
             {"input": [10], "output": 11},
@@ -753,10 +755,11 @@ TASKS = [
     },
     {
         "id": 64,
-        "title": "ЕГЭ №11 — Рекурсивная функция",
-        "description": "Дана рекурсивная функция F(n): если n <= 1, возвращает 1; иначе возвращает F(n-1) + F(n-2) + n. Напиши solution(n), которая вычисляет F(n).",
+        "title": "Задание 11 — Рекурсивный алгоритм",
+        "description": "Алгоритм вычисления значения функции F(n) задан следующими соотношениями:\n\nF(n) = 1, при n ≤ 1\nF(n) = F(n−1) + F(n−2) + n, при n > 1\n\nЧему равно значение функции F(n) при заданном n?",
         "difficulty": "medium",
         "category": "ege",
+        "format": "answer",
         "tests": [
             {"input": [3], "output": 6},
             {"input": [5], "output": 19},
@@ -765,22 +768,25 @@ TASKS = [
     },
     {
         "id": 65,
-        "title": "ЕГЭ №13 — Маска IP-адреса",
-        "description": "Напиши функцию solution(ip, mask), которая принимает IP-адрес и маску подсети как строки вида '192.168.1.10' и возвращает адрес сети (результат побитового И каждого октета) в том же формате строки.",
+        "title": "Задание 13 — Адресация в сетях",
+        "description": "Узел в сети имеет адрес и маску, заданные через точку четырьмя числами от 0 до 255 каждое: IP и MASK. Найдите адрес сети — результат поразрядной конъюнкции (операция И) каждого из четырёх байтов IP-адреса и маски. Ответ запишите в том же формате через точку.",
         "difficulty": "medium",
         "category": "ege",
+        "format": "code",
+        "input_hint": "Считайте IP и MASK с клавиатуры построчно (input())",
         "tests": [
-            {"input": ["192.168.1.10", "255.255.255.0"], "output": "192.168.1.0"},
-            {"input": ["10.20.30.40", "255.255.0.0"], "output": "10.20.0.0"},
-            {"input": ["172.16.5.200", "255.255.255.192"], "output": "172.16.5.192"},
+            {"stdin": "192.168.1.10\n255.255.255.0", "output": "192.168.1.0"},
+            {"stdin": "10.20.30.40\n255.255.0.0", "output": "10.20.0.0"},
+            {"stdin": "172.16.5.200\n255.255.255.192", "output": "172.16.5.192"},
         ]
     },
     {
         "id": 66,
-        "title": "ЕГЭ №16 — Максимум функции на отрезке",
-        "description": "Напиши функцию solution(a, b), которая находит максимальное значение функции f(x) = -x*x + 6*x - 5 на целочисленном отрезке [a, b] включительно.",
+        "title": "Задание 16 — Максимум функции на множестве",
+        "description": "На вход даны два целых числа A и B (A ≤ B). Найдите наибольшее значение функции f(x) = −x² + 6x − 5 при целых x, принадлежащих отрезку [A, B].",
         "difficulty": "medium",
         "category": "ege",
+        "format": "answer",
         "tests": [
             {"input": [0, 6], "output": 4},
             {"input": [4, 10], "output": 3},
@@ -789,46 +795,52 @@ TASKS = [
     },
     {
         "id": 67,
-        "title": "ЕГЭ №18 — Обработка последовательности чисел",
-        "description": "Напиши функцию solution(nums), которая находит количество пар соседних элементов списка, чья сумма делится на 3.",
+        "title": "Задание 18 — Обработка целочисленных данных",
+        "description": "На вход программе подаётся последовательность из N натуральных чисел, каждое на отдельной строке (числа от 1 до 1000). Программа должна вывести количество пар соседних элементов последовательности, сумма которых кратна 3.",
         "difficulty": "medium",
         "category": "ege",
+        "format": "code",
+        "input_hint": "Первая строка — N, затем N чисел по одному на строке",
         "tests": [
-            {"input": [[1, 2, 3, 4, 5, 6]], "output": 2},
-            {"input": [[3, 3, 3, 3]], "output": 3},
-            {"input": [[1, 1, 1]], "output": 0},
+            {"stdin": "6\n1\n2\n3\n4\n5\n6", "output": "2"},
+            {"stdin": "4\n3\n3\n3\n3", "output": "3"},
+            {"stdin": "3\n1\n1\n1", "output": "0"},
         ]
     },
     {
         "id": 68,
-        "title": "ЕГЭ №19 — Игра Ним (выигрышная позиция)",
-        "description": "В игре есть n камней. Игроки по очереди берут 1, 2 или 3 камня, кто берёт последний — побеждает. Напиши функцию solution(n), которая возвращает True если первый игрок выигрывает при правильной игре, иначе False.",
+        "title": "Задание 19 — Игра «камни» (анализ позиций)",
+        "description": "Имеется куча из S камней. Игроки по очереди берут из кучи 1, 2 или 3 камня. Выигрывает тот, кто берёт последний камень. Ходы делает первый игрок. Определите, может ли первый игрок выиграть при любой стратегии второго игрока, если оба играют оптимально. Выведите 1, если да, иначе 0.",
         "difficulty": "hard",
         "category": "ege",
+        "format": "answer",
         "tests": [
-            {"input": [4], "output": False},
-            {"input": [5], "output": True},
-            {"input": [8], "output": False},
+            {"input": [4], "output": 0},
+            {"input": [5], "output": 1},
+            {"input": [8], "output": 0},
         ]
     },
     {
         "id": 69,
-        "title": "ЕГЭ №23 — Количество программ обработки числа",
-        "description": "Дана программа: пока x не равно 1, если x чётное — x = x // 2, иначе x = 3*x + 1 (если результат <= limit) или x = x - 1. Напиши solution(start, limit), которая считает количество шагов до достижения x = 1, если на любом шаге x превышает limit — вернуть -1.",
+        "title": "Задание 23 — Подсчёт количества программ",
+        "description": "Автомат обрабатывает число x по правилам: если x чётное, заменить x на x/2; если x нечётное и 3x+1 не превышает LIMIT — заменить x на 3x+1, иначе уменьшить x на 1. Сколько потребуется шагов, чтобы из числа START получить 1? Если на каком-то шаге x превышает LIMIT — вывести -1.",
         "difficulty": "hard",
         "category": "ege",
+        "format": "code",
+        "input_hint": "Первая строка — START, вторая — LIMIT",
         "tests": [
-            {"input": [6, 100], "output": 8},
-            {"input": [7, 50], "output": 16},
-            {"input": [1, 10], "output": 0},
+            {"stdin": "6\n100", "output": "8"},
+            {"stdin": "7\n50", "output": "16"},
+            {"stdin": "1\n10", "output": "0"},
         ]
     },
     {
         "id": 70,
-        "title": "ЕГЭ №25 — Делители и кратные",
-        "description": "Напиши функцию solution(a, b, k), которая находит количество целых чисел в отрезке [a, b], кратных k, но не кратных k*2.",
+        "title": "Задание 25 — Делители и кратные числа",
+        "description": "Найдите количество целых чисел на отрезке [A, B], которые кратны K, но не кратны 2K.",
         "difficulty": "medium",
         "category": "ege",
+        "format": "answer",
         "tests": [
             {"input": [1, 20, 3], "output": 4},
             {"input": [1, 30, 5], "output": 3},
@@ -837,26 +849,30 @@ TASKS = [
     },
     {
         "id": 71,
-        "title": "ЕГЭ №26 — Анализ графа путей",
-        "description": "Дан граф из n вершин (0..n-1) и список рёбер edges [[from, to], ...] (ориентированный). Напиши solution(n, edges, start, end), которая возвращает количество различных путей из start в end без повторения вершин.",
+        "title": "Задание 26 — Анализ графов",
+        "description": "Граф задан списком рёбер: первая строка — количество вершин N и рёбер M, затем M строк с парами вершин (ориентированное ребро from to), нумерация с 0. В последней строке — вершины START и END. Найдите количество различных путей из START в END, не проходящих повторно через одну и ту же вершину.",
         "difficulty": "hard",
         "category": "ege",
+        "format": "code",
+        "input_hint": "Считайте N, M, затем M рёбер, затем START и END",
         "tests": [
-            {"input": [4, [[0,1],[0,2],[1,3],[2,3]], 0, 3], "output": 2},
-            {"input": [3, [[0,1],[1,2]], 0, 2], "output": 1},
-            {"input": [3, [[0,1],[0,2]], 0, 2], "output": 1},
+            {"stdin": "4 4\n0 1\n0 2\n1 3\n2 3\n0 3", "output": "2"},
+            {"stdin": "3 2\n0 1\n1 2\n0 2", "output": "1"},
+            {"stdin": "3 2\n0 1\n0 2\n0 2", "output": "1"},
         ]
     },
     {
         "id": 72,
-        "title": "ЕГЭ №27 — Оптимальная обработка массива",
-        "description": "Напиши функцию solution(nums), которая находит максимальную сумму подряд идущих элементов массива, при условии что в выбранный отрезок должен входить хотя бы один отрицательный элемент. Если отрицательных элементов нет — вернуть 0.",
+        "title": "Задание 27 — Оптимальная обработка массива",
+        "description": "Дана последовательность из N целых чисел (каждое на отдельной строке). Найдите максимальную сумму подряд идущих элементов последовательности при условии, что в выбранный отрезок входит хотя бы один отрицательный элемент. Если отрицательных элементов в последовательности нет, выведите 0.",
         "difficulty": "hard",
         "category": "ege",
+        "format": "code",
+        "input_hint": "Первая строка — N, затем N чисел по одному на строке",
         "tests": [
-            {"input": [[2, -1, 3, 4, -2, 5]], "output": 11},
-            {"input": [[1, 2, 3]], "output": 0},
-            {"input": [[-5, 1, 1]], "output": -3},
+            {"stdin": "6\n2\n-1\n3\n4\n-2\n5", "output": "11"},
+            {"stdin": "3\n1\n2\n3", "output": "0"},
+            {"stdin": "3\n-5\n1\n1", "output": "-3"},
         ]
     },
 ]
@@ -1112,21 +1128,67 @@ def submit_code(data):
         return
     room = rooms[room_id]
     task = room['task']
+    task_format = task.get('format', 'function')
     results = []
     passed = 0
-    for test in task['tests']:
-        try:
-            full_code = code + f"\nresult = solution(*{test['input']})"
-            exec_globals = {}
-            exec(full_code, exec_globals)
-            if exec_globals['result'] == test['output']:
+
+    if task_format == 'answer':
+        # ЕГЭ-формат: игрок просто вводит ответ (число/строку), без кода
+        user_answer = str(code).strip()
+        for test in task['tests']:
+            expected = str(test['output']).strip()
+            if user_answer == expected:
                 results.append('✅')
                 passed += 1
             else:
-                results.append(f"❌ (ожидалось {test['output']}, получили {exec_globals['result']})")
-        except Exception as e:
-            results.append(f"❌ Ошибка: {str(e)}")
-    all_passed = passed == len(task['tests'])
+                results.append(f"❌ (ожидалось {expected})")
+        # Для ответа достаточно совпадения с первым (основным) тестом — он один и тот же набор данных
+        all_passed = passed > 0 and results[0] == '✅'
+        passed = 1 if all_passed else 0
+        results = results[:1]
+
+    elif task_format == 'code':
+        # ЕГЭ-формат: свой код без обёртки в функцию, ввод через input(), вывод через print()
+        import io
+        import contextlib
+        for test in task['tests']:
+            try:
+                stdin_data = test.get('stdin', '')
+                input_lines = iter(stdin_data.split('\n'))
+
+                def fake_input(prompt=''):
+                    return next(input_lines)
+
+                exec_globals = {'__name__': '__main__', 'input': fake_input}
+                output_buffer = io.StringIO()
+                with contextlib.redirect_stdout(output_buffer):
+                    exec(code, exec_globals)
+                actual = output_buffer.getvalue().strip()
+                expected = str(test['output']).strip()
+                if actual == expected:
+                    results.append('✅')
+                    passed += 1
+                else:
+                    results.append(f"❌ (ожидалось {expected}, получили {actual})")
+            except Exception as e:
+                results.append(f"❌ Ошибка: {str(e)}")
+        all_passed = passed == len(task['tests'])
+
+    else:
+        # Обычный формат: функция solution(...)
+        for test in task['tests']:
+            try:
+                full_code = code + f"\nresult = solution(*{test['input']})"
+                exec_globals = {}
+                exec(full_code, exec_globals)
+                if exec_globals['result'] == test['output']:
+                    results.append('✅')
+                    passed += 1
+                else:
+                    results.append(f"❌ (ожидалось {test['output']}, получили {exec_globals['result']})")
+            except Exception as e:
+                results.append(f"❌ Ошибка: {str(e)}")
+        all_passed = passed == len(task['tests'])
 
     if all_passed and username not in room['finished']:
         room['finished'].append(username)
@@ -1184,7 +1246,7 @@ def submit_code(data):
     emit('test_results', {
         'results': results,
         'passed': passed,
-        'total': len(task['tests']),
+        'total': len(results) if task_format == 'answer' else len(task['tests']),
         'won': all_passed and len(room['finished']) == 1 and room['finished'][0] == username
     })
 
