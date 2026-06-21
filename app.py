@@ -6,6 +6,7 @@ from datetime import datetime
 import uuid
 import random
 import os
+import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret123'
@@ -17,7 +18,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 class Player(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -713,6 +714,151 @@ TASKS = [
             {"input": [[[5,3,0,0,7,0,0,0,0],[6,0,0,1,9,5,0,0,0],[0,9,8,0,0,0,0,6,0],[8,0,0,0,6,0,0,0,3],[4,0,0,8,0,3,0,0,1],[7,0,0,0,2,0,0,0,6],[0,6,0,0,0,0,2,8,0],[0,0,0,4,1,9,0,0,5],[0,0,0,0,8,0,0,7,9]]], "output": True},
         ]
     },
+    # === ЕГЭ ПО ИНФОРМАТИКЕ ===
+    {
+        "id": 61,
+        "title": "ЕГЭ №1 — Системы счисления",
+        "description": "Напиши функцию solution(n), которая переводит число n из десятичной системы в восьмеричную и возвращает результат как целое число (например, 8 → 10, читается как '10' в восьмеричной).",
+        "difficulty": "easy",
+        "category": "ege",
+        "tests": [
+            {"input": [8], "output": 10},
+            {"input": [64], "output": 100},
+            {"input": [15], "output": 17},
+        ]
+    },
+    {
+        "id": 62,
+        "title": "ЕГЭ №2 — Таблица истинности",
+        "description": "Напиши функцию solution(a, b, c), которая вычисляет логическое выражение (a ИЛИ b) И (НЕ c) и возвращает результат как 1 (истина) или 0 (ложь). На вход подаются 0 или 1.",
+        "difficulty": "easy",
+        "category": "ege",
+        "tests": [
+            {"input": [1, 0, 0], "output": 1},
+            {"input": [0, 0, 1], "output": 0},
+            {"input": [0, 0, 0], "output": 0},
+        ]
+    },
+    {
+        "id": 63,
+        "title": "ЕГЭ №6 — Трассировка цикла",
+        "description": "Напиши функцию solution(n), которая имитирует работу программы: переменная s = 0, затем в цикле от i = 1 до n включительно выполняется s = s + i, если i делится на 3, иначе s = s - 1. Вернуть итоговое значение s.",
+        "difficulty": "medium",
+        "category": "ege",
+        "tests": [
+            {"input": [6], "output": 6},
+            {"input": [10], "output": 11},
+            {"input": [3], "output": 1},
+        ]
+    },
+    {
+        "id": 64,
+        "title": "ЕГЭ №11 — Рекурсивная функция",
+        "description": "Дана рекурсивная функция F(n): если n <= 1, возвращает 1; иначе возвращает F(n-1) + F(n-2) + n. Напиши solution(n), которая вычисляет F(n).",
+        "difficulty": "medium",
+        "category": "ege",
+        "tests": [
+            {"input": [3], "output": 6},
+            {"input": [5], "output": 19},
+            {"input": [1], "output": 1},
+        ]
+    },
+    {
+        "id": 65,
+        "title": "ЕГЭ №13 — Маска IP-адреса",
+        "description": "Напиши функцию solution(ip, mask), которая принимает IP-адрес и маску подсети как строки вида '192.168.1.10' и возвращает адрес сети (результат побитового И каждого октета) в том же формате строки.",
+        "difficulty": "medium",
+        "category": "ege",
+        "tests": [
+            {"input": ["192.168.1.10", "255.255.255.0"], "output": "192.168.1.0"},
+            {"input": ["10.20.30.40", "255.255.0.0"], "output": "10.20.0.0"},
+            {"input": ["172.16.5.200", "255.255.255.192"], "output": "172.16.5.192"},
+        ]
+    },
+    {
+        "id": 66,
+        "title": "ЕГЭ №16 — Максимум функции на отрезке",
+        "description": "Напиши функцию solution(a, b), которая находит максимальное значение функции f(x) = -x*x + 6*x - 5 на целочисленном отрезке [a, b] включительно.",
+        "difficulty": "medium",
+        "category": "ege",
+        "tests": [
+            {"input": [0, 6], "output": 4},
+            {"input": [4, 10], "output": 3},
+            {"input": [-2, 1], "output": -5},
+        ]
+    },
+    {
+        "id": 67,
+        "title": "ЕГЭ №18 — Обработка последовательности чисел",
+        "description": "Напиши функцию solution(nums), которая находит количество пар соседних элементов списка, чья сумма делится на 3.",
+        "difficulty": "medium",
+        "category": "ege",
+        "tests": [
+            {"input": [[1, 2, 3, 4, 5, 6]], "output": 2},
+            {"input": [[3, 3, 3, 3]], "output": 3},
+            {"input": [[1, 1, 1]], "output": 0},
+        ]
+    },
+    {
+        "id": 68,
+        "title": "ЕГЭ №19 — Игра Ним (выигрышная позиция)",
+        "description": "В игре есть n камней. Игроки по очереди берут 1, 2 или 3 камня, кто берёт последний — побеждает. Напиши функцию solution(n), которая возвращает True если первый игрок выигрывает при правильной игре, иначе False.",
+        "difficulty": "hard",
+        "category": "ege",
+        "tests": [
+            {"input": [4], "output": False},
+            {"input": [5], "output": True},
+            {"input": [8], "output": False},
+        ]
+    },
+    {
+        "id": 69,
+        "title": "ЕГЭ №23 — Количество программ обработки числа",
+        "description": "Дана программа: пока x не равно 1, если x чётное — x = x // 2, иначе x = 3*x + 1 (если результат <= limit) или x = x - 1. Напиши solution(start, limit), которая считает количество шагов до достижения x = 1, если на любом шаге x превышает limit — вернуть -1.",
+        "difficulty": "hard",
+        "category": "ege",
+        "tests": [
+            {"input": [6, 100], "output": 8},
+            {"input": [7, 50], "output": 16},
+            {"input": [1, 10], "output": 0},
+        ]
+    },
+    {
+        "id": 70,
+        "title": "ЕГЭ №25 — Делители и кратные",
+        "description": "Напиши функцию solution(a, b, k), которая находит количество целых чисел в отрезке [a, b], кратных k, но не кратных k*2.",
+        "difficulty": "medium",
+        "category": "ege",
+        "tests": [
+            {"input": [1, 20, 3], "output": 4},
+            {"input": [1, 30, 5], "output": 3},
+            {"input": [10, 10, 2], "output": 0},
+        ]
+    },
+    {
+        "id": 71,
+        "title": "ЕГЭ №26 — Анализ графа путей",
+        "description": "Дан граф из n вершин (0..n-1) и список рёбер edges [[from, to], ...] (ориентированный). Напиши solution(n, edges, start, end), которая возвращает количество различных путей из start в end без повторения вершин.",
+        "difficulty": "hard",
+        "category": "ege",
+        "tests": [
+            {"input": [4, [[0,1],[0,2],[1,3],[2,3]], 0, 3], "output": 2},
+            {"input": [3, [[0,1],[1,2]], 0, 2], "output": 1},
+            {"input": [3, [[0,1],[0,2]], 0, 2], "output": 1},
+        ]
+    },
+    {
+        "id": 72,
+        "title": "ЕГЭ №27 — Оптимальная обработка массива",
+        "description": "Напиши функцию solution(nums), которая находит максимальную сумму подряд идущих элементов массива, при условии что в выбранный отрезок должен входить хотя бы один отрицательный элемент. Если отрицательных элементов нет — вернуть 0.",
+        "difficulty": "hard",
+        "category": "ege",
+        "tests": [
+            {"input": [[2, -1, 3, 4, -2, 5]], "output": 11},
+            {"input": [[1, 2, 3]], "output": 0},
+            {"input": [[-5, 1, 1]], "output": -3},
+        ]
+    },
 ]
 
 # --- Роуты ---
@@ -817,44 +963,61 @@ def update_ratings(winner_name, loser_name, task_title, difficulty='easy'):
 
 # --- Сокет события ---
 
+def pick_task(difficulty, mode='general'):
+    if mode == 'ege':
+        filtered = [t for t in TASKS if t.get('category') == 'ege']
+    else:
+        filtered = [t for t in TASKS if t.get('difficulty') == difficulty and t.get('category') != 'ege']
+    return random.choice(filtered if filtered else TASKS)
+
 @socketio.on('find_match')
 def find_match(data):
     username = data['username']
     difficulty = data.get('difficulty', 'easy')
+    mode = data.get('mode', 'general')
     global matchmaking_queue
 
     # Убираем если уже в очереди
     matchmaking_queue = [p for p in matchmaking_queue if p['username'] != username]
 
-    # Ищем соперника с той же сложностью
+    # Ищем соперника с той же сложностью и режимом
     opponent = None
     for p in matchmaking_queue:
-        if p.get('difficulty') == difficulty:
+        if p.get('difficulty') == difficulty and p.get('mode') == mode:
             opponent = p
             break
 
     if opponent:
         matchmaking_queue.remove(opponent)
         room_id = str(uuid.uuid4())[:8]
-        filtered = [t for t in TASKS if t.get('difficulty') == difficulty]
-        task = random.choice(filtered if filtered else TASKS)
+        task = pick_task(difficulty, mode)
+        rounds_total = data.get('rounds', 1)
         rooms[room_id] = {
             'players': [opponent['username'], username],
             'task': task,
             'finished': [],
+            'difficulty': difficulty,
+            'mode': mode,
+            'rounds_total': rounds_total,
+            'round': 1,
+            'scores': {opponent['username']: 0, username: 0},
         }
         join_room(room_id)
         emit('match_found', {'room_id': room_id}, to=opponent['sid'])
         emit('match_found', {'room_id': room_id})
         socketio.emit('duel_start', {
             'task': task,
-            'players': [opponent['username'], username]
+            'players': [opponent['username'], username],
+            'round': 1,
+            'rounds_total': rounds_total,
+            'scores': rooms[room_id]['scores']
         }, to=room_id)
     else:
         matchmaking_queue.append({
             'username': username,
             'sid': request.sid,
-            'difficulty': difficulty
+            'difficulty': difficulty,
+            'mode': mode
         })
         emit('searching')
 
@@ -868,13 +1031,19 @@ def cancel_search(data):
 def create_room(data):
     room_id = str(uuid.uuid4())[:8]
     difficulty = data.get('difficulty', 'easy')
-    filtered = [t for t in TASKS if t.get('difficulty') == difficulty]
-    task = random.choice(filtered if filtered else TASKS)
+    mode = data.get('mode', 'general')
+    rounds_total = int(data.get('rounds', 1))
+    task = pick_task(difficulty, mode)
     rooms[room_id] = {
         'players': [data['username']],
         'task': task,
         'finished': [],
-        'creator_sid': request.sid
+        'creator_sid': request.sid,
+        'difficulty': difficulty,
+        'mode': mode,
+        'rounds_total': rounds_total,
+        'round': 1,
+        'scores': {},
     }
     join_room(room_id)
     emit('room_created', {'room_id': room_id})
@@ -891,7 +1060,10 @@ def rejoin_room(data):
     if len(room['players']) == 2:
         emit('duel_start', {
             'task': room['task'],
-            'players': room['players']
+            'players': room['players'],
+            'round': room['round'],
+            'rounds_total': room['rounds_total'],
+            'scores': room['scores']
         })
 
 @socketio.on('join_room_event')
@@ -906,10 +1078,28 @@ def join_room_event(data):
         emit('error', {'message': 'Комната уже заполнена!'})
         return
     room['players'].append(username)
+    for p in room['players']:
+        room['scores'].setdefault(p, 0)
     join_room(room_id)
     emit('duel_start', {
         'task': room['task'],
-        'players': room['players']
+        'players': room['players'],
+        'round': room['round'],
+        'rounds_total': room['rounds_total'],
+        'scores': room['scores']
+    }, to=room_id)
+
+def start_next_round(room_id):
+    room = rooms[room_id]
+    room['round'] += 1
+    room['finished'] = []
+    room['task'] = pick_task(room.get('difficulty', 'easy'), room.get('mode', 'general'))
+    socketio.emit('round_start', {
+        'task': room['task'],
+        'players': room['players'],
+        'round': room['round'],
+        'rounds_total': room['rounds_total'],
+        'scores': room['scores']
     }, to=room_id)
 
 @socketio.on('submit_code')
@@ -937,28 +1127,60 @@ def submit_code(data):
         except Exception as e:
             results.append(f"❌ Ошибка: {str(e)}")
     all_passed = passed == len(task['tests'])
+
     if all_passed and username not in room['finished']:
         room['finished'].append(username)
         place = len(room['finished'])
-        if place == 1 and len(room['players']) == 2:
+        room.setdefault('scores', {})
+        room['scores'].setdefault(username, 0)
+
+        is_final_winner = (place == 1 and len(room['players']) == 2)
+        rounds_total = room.get('rounds_total', 1)
+
+        if is_final_winner:
+            room['scores'][username] = room['scores'].get(username, 0) + 1
             other = [p for p in room['players'] if p != username][0]
-            difficulty = task.get('difficulty', 'easy')
-            try:
-                win_pts, loss_pts = update_ratings(username, other, task['title'], difficulty)
-                print(f"RATING UPDATE: {username} +{win_pts}, {other} {loss_pts}")
-            except Exception as e:
-                print(f"RATING ERROR: {e}")
-                win_pts, loss_pts = 25, -25
-            # Уведомляем победителя
-            emit('rating_update', {'change': win_pts})
-            # Уведомляем проигравшего
-            emit('opponent_finished', {
-                'username': username,
-                'place': place,
-                'rating_change': loss_pts
-            }, to=room_id)
+            room['scores'].setdefault(other, 0)
+
+            match_over = room['scores'][username] > rounds_total // 2 or room['round'] >= rounds_total
+
+            if match_over:
+                # Финальный победитель матча — обновляем рейтинг
+                difficulty = task.get('difficulty', 'easy')
+                try:
+                    win_pts, loss_pts = update_ratings(username, other, task['title'], difficulty)
+                except Exception as e:
+                    print(f"RATING ERROR: {e}")
+                    win_pts, loss_pts = 25, -25
+                emit('rating_update', {
+                    'change': win_pts,
+                    'scores': room['scores'],
+                    'final': True
+                })
+                emit('opponent_finished', {
+                    'username': username,
+                    'place': place,
+                    'rating_change': loss_pts,
+                    'scores': room['scores'],
+                    'final': True
+                }, to=room_id)
+            else:
+                # Раунд выиграл, но матч продолжается
+                emit('round_won', {
+                    'username': username,
+                    'scores': room['scores'],
+                    'round': room['round'],
+                    'rounds_total': rounds_total
+                }, to=room_id)
+
+                def delayed_next_round():
+                    time.sleep(2.5)
+                    start_next_round(room_id)
+
+                socketio.start_background_task(delayed_next_round)
         else:
             emit('opponent_finished', {'username': username, 'place': place}, to=room_id)
+
     emit('test_results', {
         'results': results,
         'passed': passed,

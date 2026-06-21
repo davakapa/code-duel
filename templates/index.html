@@ -265,6 +265,57 @@ body {
     margin-bottom: 14px;
 }
 
+.mini-select-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.mini-select-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    text-align: left;
+}
+
+.mini-select-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.mini-btn {
+    flex: 1;
+    padding: 9px 6px;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text-dim);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    width: auto;
+    margin-bottom: 0;
+}
+
+.mini-btn:hover { border-color: var(--text-dim); color: var(--text); }
+
+.mini-btn.active {
+    background: var(--bg-input);
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.diff-cards.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
 .split-actions { display: flex; gap: 10px; }
 
 .btn-ghost {
@@ -348,7 +399,7 @@ body {
         <div class="ladder-step s3 mono" data-step="hard">hard</div>
     </div>
 
-    <div class="diff-cards">
+    <div class="diff-cards" id="diff-cards-block">
         <div class="diff-card active" data-d="easy">
             <span class="diff-icon">🟢</span>
             <div class="diff-title">Easy</div>
@@ -363,6 +414,23 @@ body {
             <span class="diff-icon">🔴</span>
             <div class="diff-title">Hard</div>
             <div class="diff-stake">+100 win · −10 loss</div>
+        </div>
+    </div>
+
+    <div class="mini-select-row">
+        <div class="mini-select-group">
+            <div class="mini-select-label">тип задач</div>
+            <div class="mini-select-buttons">
+                <button class="mini-btn active" data-mode="general">алгоритмы</button>
+                <button class="mini-btn" data-mode="ege">ЕГЭ инфо</button>
+            </div>
+        </div>
+        <div class="mini-select-group">
+            <div class="mini-select-label">формат</div>
+            <div class="mini-select-buttons">
+                <button class="mini-btn active" data-rounds="1">1 раунд</button>
+                <button class="mini-btn" data-rounds="3">best of 3</button>
+            </div>
         </div>
     </div>
 
@@ -401,6 +469,8 @@ body {
     const socket = io();
     const username = "{{ username }}";
     let selectedDifficulty = 'easy';
+    let selectedMode = 'general';
+    let selectedRounds = 1;
     let searchTimer = null;
     let searchSeconds = 0;
 
@@ -408,7 +478,14 @@ body {
         document.querySelectorAll('.ladder-step').forEach(step => {
             step.classList.toggle('lit', step.dataset.step === diff);
         });
-        document.getElementById('friend-hint').textContent = 'комната создастся со сложностью: ' + diff;
+        updateFriendHint();
+    }
+
+    function updateFriendHint() {
+        const modeLabel = selectedMode === 'ege' ? 'ЕГЭ инфо' : selectedDifficulty;
+        const roundsLabel = selectedRounds === 3 ? ', best of 3' : '';
+        document.getElementById('friend-hint').textContent =
+            'комната создастся: ' + modeLabel + roundsLabel;
     }
 
     document.querySelectorAll('.diff-card').forEach(b => {
@@ -417,6 +494,25 @@ body {
             this.classList.add('active');
             selectedDifficulty = this.dataset.d;
             syncLadder(selectedDifficulty);
+        });
+    });
+
+    document.querySelectorAll('.mini-btn[data-mode]').forEach(b => {
+        b.addEventListener('click', function() {
+            document.querySelectorAll('.mini-btn[data-mode]').forEach(x => x.classList.remove('active'));
+            this.classList.add('active');
+            selectedMode = this.dataset.mode;
+            document.getElementById('diff-cards-block').classList.toggle('disabled', selectedMode === 'ege');
+            updateFriendHint();
+        });
+    });
+
+    document.querySelectorAll('.mini-btn[data-rounds]').forEach(b => {
+        b.addEventListener('click', function() {
+            document.querySelectorAll('.mini-btn[data-rounds]').forEach(x => x.classList.remove('active'));
+            this.classList.add('active');
+            selectedRounds = parseInt(this.dataset.rounds);
+            updateFriendHint();
         });
     });
 
@@ -432,8 +528,8 @@ body {
         document.getElementById('btn-cancel').style.display = 'block';
         document.getElementById('error').textContent = '';
 
-        const labels = { easy: 'easy', medium: 'medium', hard: 'hard' };
-        document.getElementById('searching-meta').textContent = 'ищем соперника на ' + labels[selectedDifficulty] + '...';
+        const modeLabel = selectedMode === 'ege' ? 'ЕГЭ' : selectedDifficulty;
+        document.getElementById('searching-meta').textContent = 'ищем соперника: ' + modeLabel + (selectedRounds === 3 ? ' · bo3' : '');
 
         searchSeconds = 0;
         searchTimer = setInterval(function() {
@@ -441,7 +537,12 @@ body {
             document.getElementById('search-timer').textContent = searchSeconds + ' сек';
         }, 1000);
 
-        socket.emit('find_match', { username: username, difficulty: selectedDifficulty });
+        socket.emit('find_match', {
+            username: username,
+            difficulty: selectedDifficulty,
+            mode: selectedMode,
+            rounds: selectedRounds
+        });
     });
 
     document.getElementById('btn-cancel').addEventListener('click', function() {
@@ -457,7 +558,12 @@ body {
     }
 
     document.getElementById('btn-create').addEventListener('click', function() {
-        socket.emit('create_room', { username: username, difficulty: selectedDifficulty });
+        socket.emit('create_room', {
+            username: username,
+            difficulty: selectedDifficulty,
+            mode: selectedMode,
+            rounds: selectedRounds
+        });
     });
 
     document.getElementById('btn-join').addEventListener('click', function() {

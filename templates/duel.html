@@ -85,6 +85,31 @@ body {
 .player-tag.me { border-color: var(--ember); color: var(--ember); }
 .player-tag.done { border-color: var(--ok); color: var(--ok); }
 
+.round-score {
+    font-size: 13px;
+    color: var(--gold);
+    background: var(--bg-input);
+    border: 1px solid var(--line);
+    padding: 5px 14px;
+    border-radius: 100px;
+}
+
+.round-banner {
+    position: fixed;
+    top: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-raised);
+    border: 1px solid var(--ok);
+    color: var(--ok);
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 15px;
+    z-index: 150;
+    animation: slideUp 0.3s ease;
+}
+
 .main { display: flex; flex: 1; overflow: hidden; }
 
 .task-panel {
@@ -398,6 +423,7 @@ textarea {
 
 <div class="header">
     <div class="logo"><div class="logo-mark">⚔</div>Code Duel</div>
+    <div class="round-score mono" id="round-score" style="display: none;"></div>
     <div class="timer" id="timer">05:00</div>
     <div class="players" id="players-display"></div>
 </div>
@@ -429,6 +455,9 @@ textarea {
     let timerInterval = null;
     let matchStartTime = null;
     let currentTask = null;
+    let roundsTotal = 1;
+    let currentRound = 1;
+    let currentScores = {};
 
     if (isSecondPlayer) {
         document.getElementById('waiting-overlay').style.display = 'none';
@@ -595,10 +624,28 @@ textarea {
         if (won) spawnConfetti();
     }
 
-    socket.on('duel_start', function(data) {
+    function updateRoundScore() {
+        const el = document.getElementById('round-score');
+        if (roundsTotal <= 1) {
+            el.style.display = 'none';
+            return;
+        }
+        el.style.display = 'block';
+        const me = currentScores[username] || 0;
+        const opponentName = Object.keys(currentScores).find(p => p !== username);
+        const opp = opponentName ? (currentScores[opponentName] || 0) : 0;
+        el.textContent = 'раунд ' + currentRound + '/' + roundsTotal + ' · ' + me + ' : ' + opp;
+    }
+
+    function setupRound(data) {
         document.getElementById('waiting-overlay').style.display = 'none';
         showTask(data.task);
         startTimer();
+        roundsTotal = data.rounds_total || 1;
+        currentRound = data.round || 1;
+        currentScores = data.scores || {};
+        updateRoundScore();
+
         const pd = document.getElementById('players-display');
         pd.innerHTML = '';
         data.players.forEach(function(p) {
@@ -608,10 +655,41 @@ textarea {
             tag.textContent = (p === username ? 'ты: ' : 'vs: ') + p;
             pd.appendChild(tag);
         });
+
+        document.getElementById('submit-btn').disabled = false;
+        document.getElementById('results-display').innerHTML = '';
+        document.getElementById('result-text').textContent = '';
+    }
+
+    function showRoundBanner(text) {
+        const banner = document.createElement('div');
+        banner.className = 'round-banner';
+        banner.textContent = text;
+        document.body.appendChild(banner);
+        setTimeout(() => banner.remove(), 2300);
+    }
+
+    socket.on('duel_start', function(data) {
+        setupRound(data);
+    });
+
+    socket.on('round_start', function(data) {
+        setupRound(data);
+    });
+
+    socket.on('round_won', function(data) {
+        currentScores = data.scores || currentScores;
+        currentRound = data.round || currentRound;
+        updateRoundScore();
+        clearInterval(timerInterval);
+        const won = data.username === username;
+        showRoundBanner(won ? '🏆 ты выиграл раунд ' + currentRound : '😔 раунд выиграл ' + data.username);
     });
 
     socket.on('rating_update', function(data) {
-        showResult(true, 'win', '', 'ты решил задачу первым!', data.change);
+        if (data.scores) currentScores = data.scores;
+        const sub = roundsTotal > 1 ? 'ты выиграл матч!' : 'ты решил задачу первым!';
+        showResult(true, 'win', '', sub, data.change);
     });
 
     socket.on('test_results', function(data) {
@@ -623,9 +701,13 @@ textarea {
     socket.on('opponent_finished', function(data) {
         const tag = document.getElementById('player-' + data.username);
         if (tag) tag.classList.add('done');
-        if (data.username !== username && data.place === 1) {
+        if (data.scores) currentScores = data.scores;
+        if (data.username !== username && data.place === 1 && data.final) {
             const change = data.rating_change || -25;
-            showResult(false, 'loss', 'поражение', data.username + ' решил задачу быстрее тебя', change);
+            const sub = roundsTotal > 1
+                ? data.username + ' выиграл матч'
+                : data.username + ' решил задачу быстрее тебя';
+            showResult(false, 'loss', 'поражение', sub, change);
         }
     });
 
