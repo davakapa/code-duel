@@ -991,15 +991,16 @@ def find_match(data):
     username = data['username']
     difficulty = data.get('difficulty', 'easy')
     mode = data.get('mode', 'general')
+    rounds_total = int(data.get('rounds', 1))
     global matchmaking_queue
 
     # Убираем если уже в очереди
     matchmaking_queue = [p for p in matchmaking_queue if p['username'] != username]
 
-    # Ищем соперника с той же сложностью и режимом
+    # Ищем соперника с той же сложностью, режимом и форматом раундов
     opponent = None
     for p in matchmaking_queue:
-        if p.get('difficulty') == difficulty and p.get('mode') == mode:
+        if p.get('difficulty') == difficulty and p.get('mode') == mode and p.get('rounds') == rounds_total:
             opponent = p
             break
 
@@ -1007,7 +1008,6 @@ def find_match(data):
         matchmaking_queue.remove(opponent)
         room_id = str(uuid.uuid4())[:8]
         task = pick_task(difficulty, mode)
-        rounds_total = data.get('rounds', 1)
         rooms[room_id] = {
             'players': [opponent['username'], username],
             'task': task,
@@ -1033,7 +1033,8 @@ def find_match(data):
             'username': username,
             'sid': request.sid,
             'difficulty': difficulty,
-            'mode': mode
+            'mode': mode,
+            'rounds': rounds_total
         })
         emit('searching')
 
