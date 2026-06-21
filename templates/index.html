@@ -258,6 +258,13 @@ body {
 .alt-row .line { flex: 1; height: 1px; background: var(--line); }
 .alt-row span { font-size: 12px; color: var(--text-dim); }
 
+.friend-hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+}
+
 .split-actions { display: flex; gap: 10px; }
 
 .btn-ghost {
@@ -374,6 +381,8 @@ body {
         <div class="line"></div>
     </div>
 
+    <div class="friend-hint mono" id="friend-hint">комната создастся со сложностью: easy</div>
+
     <div class="split-actions">
         <button class="btn-ghost" id="btn-create">создать комнату</button>
         <input class="room-input" id="room_code" placeholder="код комнаты" maxlength="8" />
@@ -399,6 +408,7 @@ body {
         document.querySelectorAll('.ladder-step').forEach(step => {
             step.classList.toggle('lit', step.dataset.step === diff);
         });
+        document.getElementById('friend-hint').textContent = 'комната создастся со сложностью: ' + diff;
     }
 
     document.querySelectorAll('.diff-card').forEach(b => {
