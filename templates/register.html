@@ -110,6 +110,37 @@ input {
 
 input:focus { border-color: var(--ok); }
 
+.avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.avatar-opt {
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--bg-input);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-bottom: 0;
+}
+
+.avatar-opt:hover { border-color: var(--text-dim); transform: scale(1.05); }
+
+.avatar-opt.selected {
+    border-color: var(--ok);
+    background: rgba(111, 217, 140, 0.1);
+    box-shadow: 0 0 0 1px var(--ok) inset;
+}
+
 button {
     width: 100%;
     padding: 15px;
@@ -158,6 +189,14 @@ button:hover { transform: translateY(-1px); }
         <label>пароль</label>
         <input type="password" name="password" placeholder="придумай пароль"/>
 
+        <label>аватар бойца</label>
+        <div class="avatar-grid" id="avatar-grid">
+            {% for a in avatars %}
+            <button type="button" class="avatar-opt{% if loop.first %} selected{% endif %}" data-avatar="{{ a }}">{{ a }}</button>
+            {% endfor %}
+        </div>
+        <input type="hidden" name="avatar" id="avatar-input" value="{{ avatars[0] }}"/>
+
         <button type="submit">создать бойца →</button>
     </form>
 
@@ -165,5 +204,14 @@ button:hover { transform: translateY(-1px); }
         уже есть аккаунт? <a href="/login">войти</a>
     </div>
 </div>
+<script>
+document.querySelectorAll('.avatar-opt').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.avatar-opt').forEach(b => b.classList.remove('selected'));
+        this.classList.add('selected');
+        document.getElementById('avatar-input').value = this.dataset.avatar;
+    });
+});
+</script>
 </body>
 </html>

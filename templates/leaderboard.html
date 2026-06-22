@@ -142,6 +142,26 @@ body {
 
 .board-row:nth-child(2) .rank-num { color: var(--gold); }
 
+.player-name-cell { display: flex; align-items: center; gap: 10px; }
+
+.board-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--bg-input);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    border: 2px solid var(--line);
+    flex-shrink: 0;
+}
+
+.board-avatar.tier-bronze { border-color: #b08d57; }
+.board-avatar.tier-silver { border-color: #c7d0d9; }
+.board-avatar.tier-gold { border-color: var(--gold); }
+.board-avatar.tier-platinum { border-color: #7fe8d8; }
+
 .player-name { font-weight: 600; font-size: 15px; }
 
 .rating-val {
@@ -201,7 +221,10 @@ body {
         {% for player in players %}
         <a href="/profile/{{ player.username }}" class="board-row">
             <span class="rank-num">{{ loop.index }}</span>
-            <span class="player-name">{{ player.username }}</span>
+            <span class="player-name-cell">
+                <span class="board-avatar tier-{{ player.tier }}">{{ player.avatar or '⚔️' }}</span>
+                <span class="player-name">{{ player.username }}</span>
+            </span>
             <span class="rating-val">{{ player.rating }}</span>
             <span class="win-val">{{ player.wins }}W</span>
             <span class="loss-val">{{ player.losses }}L</span>

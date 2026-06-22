@@ -27,6 +27,9 @@ class Player(db.Model):
     rating = db.Column(db.Integer, default=1000)
     wins = db.Column(db.Integer, default=0)
     losses = db.Column(db.Integer, default=0)
+    avatar = db.Column(db.String(10), default='⚔️')
+    win_streak = db.Column(db.Integer, default=0)
+    best_win_streak = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     @property
@@ -35,6 +38,40 @@ class Player(db.Model):
         if total == 0:
             return 0
         return round(self.wins / total * 100)
+
+    @property
+    def tier(self):
+        if self.rating >= 1500:
+            return 'platinum'
+        elif self.rating >= 1200:
+            return 'gold'
+        elif self.rating >= 1000:
+            return 'silver'
+        else:
+            return 'bronze'
+
+    @property
+    def achievements(self):
+        earned = []
+        if self.wins >= 1:
+            earned.append({'id': 'first_win', 'name': 'Первая кровь', 'icon': '🩸', 'desc': 'Выиграй свою первую дуэль'})
+        if self.wins >= 5:
+            earned.append({'id': 'win_5', 'name': 'Боец', 'icon': '🥊', 'desc': '5 побед'})
+        if self.wins >= 10:
+            earned.append({'id': 'win_10', 'name': 'Ветеран', 'icon': '🛡️', 'desc': '10 побед'})
+        if self.wins >= 25:
+            earned.append({'id': 'win_25', 'name': 'Чемпион', 'icon': '👑', 'desc': '25 побед'})
+        if self.best_win_streak >= 3:
+            earned.append({'id': 'streak_3', 'name': 'На разгоне', 'icon': '🔥', 'desc': '3 победы подряд'})
+        if self.best_win_streak >= 5:
+            earned.append({'id': 'streak_5', 'name': 'Неудержимый', 'icon': '⚡', 'desc': '5 побед подряд'})
+        if self.rating >= 1200:
+            earned.append({'id': 'gold_tier', 'name': 'Золотой ранг', 'icon': '🥇', 'desc': 'Достигни 1200 рейтинга'})
+        if self.rating >= 1500:
+            earned.append({'id': 'platinum_tier', 'name': 'Платиновый ранг', 'icon': '💎', 'desc': 'Достигни 1500 рейтинга'})
+        return earned
+
+AVATAR_OPTIONS = ['⚔️', '🐉', '🔥', '⭐', '🎯', '🦾', '🧠', '👾', '🚀', '🦅', '🐺', '🦊']
 
 class Match(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -45,6 +82,20 @@ class Match(db.Model):
 
 with app.app_context():
     db.create_all()
+    # Безопасная миграция: добавляем новые колонки если их нет (для уже существующей базы)
+    from sqlalchemy import text, inspect
+    inspector = inspect(db.engine)
+    existing_columns = [col['name'] for col in inspector.get_columns('player')]
+    with db.engine.connect() as conn:
+        if 'avatar' not in existing_columns:
+            conn.execute(text("ALTER TABLE player ADD COLUMN avatar VARCHAR(10) DEFAULT '⚔️'"))
+            conn.commit()
+        if 'win_streak' not in existing_columns:
+            conn.execute(text("ALTER TABLE player ADD COLUMN win_streak INTEGER DEFAULT 0"))
+            conn.commit()
+        if 'best_win_streak' not in existing_columns:
+            conn.execute(text("ALTER TABLE player ADD COLUMN best_win_streak INTEGER DEFAULT 0"))
+            conn.commit()
 
 rooms = {}
 matchmaking_queue = []
@@ -1044,27 +1095,31 @@ TASKS = [
 def index():
     if 'username' not in session:
         return redirect(url_for('login'))
-    return render_template('index.html', username=session['username'])
+    player = Player.query.filter_by(username=session['username']).first()
+    return render_template('index.html', username=session['username'], player=player)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
+        avatar = request.form.get('avatar', '⚔️').strip()
+        if avatar not in AVATAR_OPTIONS:
+            avatar = '⚔️'
         if not username or not password:
-            return render_template('register.html', error='Заполни все поля!')
+            return render_template('register.html', error='Заполни все поля!', avatars=AVATAR_OPTIONS)
         if len(username) < 3:
-            return render_template('register.html', error='Никнейм минимум 3 символа!')
+            return render_template('register.html', error='Никнейм минимум 3 символа!', avatars=AVATAR_OPTIONS)
         if len(password) < 4:
-            return render_template('register.html', error='Пароль минимум 4 символа!')
+            return render_template('register.html', error='Пароль минимум 4 символа!', avatars=AVATAR_OPTIONS)
         if Player.query.filter_by(username=username).first():
-            return render_template('register.html', error='Этот никнейм уже занят!')
-        player = Player(username=username, password=generate_password_hash(password))
+            return render_template('register.html', error='Этот никнейм уже занят!', avatars=AVATAR_OPTIONS)
+        player = Player(username=username, password=generate_password_hash(password), avatar=avatar)
         db.session.add(player)
         db.session.commit()
         session['username'] = username
         return redirect(url_for('index'))
-    return render_template('register.html', error=None)
+    return render_template('register.html', error=None, avatars=AVATAR_OPTIONS)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -1123,8 +1178,13 @@ def update_ratings(winner_name, loser_name, task_title, difficulty='easy'):
         if winner and loser:
             winner.rating = winner.rating + points['win']
             winner.wins = winner.wins + 1
+            winner.win_streak = (winner.win_streak or 0) + 1
+            winner.best_win_streak = max(winner.best_win_streak or 0, winner.win_streak)
+
             loser.rating = max(0, loser.rating - points['loss'])
             loser.losses = loser.losses + 1
+            loser.win_streak = 0
+
             match = Match(winner=winner_name, loser=loser_name, task_title=task_title)
             db.session.add(match)
             db.session.flush()
@@ -1139,6 +1199,13 @@ def update_ratings(winner_name, loser_name, task_title, difficulty='easy'):
     return 25, -25
 
 # --- Сокет события ---
+
+def get_avatars(usernames):
+    result = {}
+    for u in usernames:
+        p = Player.query.filter_by(username=u).first()
+        result[u] = p.avatar if p and p.avatar else '⚔️'
+    return result
 
 def pick_task(difficulty, mode='general'):
     if mode == 'ege':
@@ -1187,7 +1254,8 @@ def find_match(data):
             'players': [opponent['username'], username],
             'round': 1,
             'rounds_total': rounds_total,
-            'scores': rooms[room_id]['scores']
+            'scores': rooms[room_id]['scores'],
+            'avatars': get_avatars([opponent['username'], username])
         }, to=room_id)
     else:
         matchmaking_queue.append({
@@ -1241,7 +1309,8 @@ def rejoin_room(data):
             'players': room['players'],
             'round': room['round'],
             'rounds_total': room['rounds_total'],
-            'scores': room['scores']
+            'scores': room['scores'],
+            'avatars': get_avatars(room['players'])
         })
 
 @socketio.on('join_room_event')
@@ -1264,7 +1333,8 @@ def join_room_event(data):
         'players': room['players'],
         'round': room['round'],
         'rounds_total': room['rounds_total'],
-        'scores': room['scores']
+        'scores': room['scores'],
+        'avatars': get_avatars(room['players'])
     }, to=room_id)
 
 def start_next_round(room_id):
@@ -1277,7 +1347,8 @@ def start_next_round(room_id):
         'players': room['players'],
         'round': room['round'],
         'rounds_total': room['rounds_total'],
-        'scores': room['scores']
+        'scores': room['scores'],
+        'avatars': get_avatars(room['players'])
     }, to=room_id)
 
 @socketio.on('submit_code')

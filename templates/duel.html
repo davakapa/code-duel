@@ -75,11 +75,25 @@ body {
 .players { display: flex; gap: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
 
 .player-tag {
-    padding: 5px 14px;
+    padding: 5px 14px 5px 5px;
     border-radius: 100px;
     background: var(--bg-input);
     border: 1px solid var(--line);
     color: var(--text-dim);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.player-tag-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bg-raised);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
 }
 
 .player-tag.me { border-color: var(--ember); color: var(--ember); }
@@ -717,6 +731,7 @@ textarea {
         roundsTotal = data.rounds_total || 1;
         currentRound = data.round || 1;
         currentScores = data.scores || {};
+        const avatars = data.avatars || {};
         updateRoundScore();
 
         const pd = document.getElementById('players-display');
@@ -725,7 +740,8 @@ textarea {
             const tag = document.createElement('div');
             tag.className = 'player-tag' + (p === username ? ' me' : '');
             tag.id = 'player-' + p;
-            tag.textContent = (p === username ? 'ты: ' : 'vs: ') + p;
+            const av = avatars[p] || '⚔️';
+            tag.innerHTML = '<span class="player-tag-avatar">' + av + '</span>' + (p === username ? 'ты: ' : 'vs: ') + p;
             pd.appendChild(tag);
         });
 

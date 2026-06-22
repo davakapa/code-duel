@@ -95,15 +95,36 @@ body {
     width: 76px;
     height: 76px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--ember), #ff5e3d);
+    background: var(--bg-input);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 30px;
-    font-weight: 700;
-    color: #1a0f08;
+    font-size: 34px;
     flex-shrink: 0;
+    border: 3px solid var(--line);
 }
+
+.avatar.tier-bronze { border-color: #b08d57; box-shadow: 0 0 14px rgba(176,141,87,0.3); }
+.avatar.tier-silver { border-color: #c7d0d9; box-shadow: 0 0 14px rgba(199,208,217,0.35); }
+.avatar.tier-gold { border-color: var(--gold); box-shadow: 0 0 16px rgba(255,193,77,0.4); }
+.avatar.tier-platinum { border-color: #7fe8d8; box-shadow: 0 0 18px rgba(127,232,216,0.45); }
+
+.tier-label {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.tier-label.tier-bronze { background: rgba(176,141,87,0.15); color: #d4b483; border: 1px solid #b08d57; }
+.tier-label.tier-silver { background: rgba(199,208,217,0.15); color: #e1e7ec; border: 1px solid #c7d0d9; }
+.tier-label.tier-gold { background: rgba(255,193,77,0.15); color: var(--gold); border: 1px solid var(--gold); }
+.tier-label.tier-platinum { background: rgba(127,232,216,0.15); color: #7fe8d8; border: 1px solid #7fe8d8; }
 
 .profile-info { flex: 1; }
 
@@ -159,6 +180,35 @@ body {
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 16px;
+}
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 32px;
+}
+
+.achievement-card {
+    background: var(--bg-raised);
+    border: 1px solid var(--gold);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+}
+
+.achievement-icon { font-size: 28px; display: block; margin-bottom: 6px; }
+.achievement-name { font-size: 13px; font-weight: 600; color: var(--gold); margin-bottom: 2px; }
+.achievement-desc { font-size: 11px; color: var(--text-dim); }
+
+.no-achievements {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-bottom: 32px;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
 }
 
 .match {
@@ -227,9 +277,9 @@ body {
 {% else %}
 
 <div class="profile-card">
-    <div class="avatar">{{ player.username[0].upper() }}</div>
+    <div class="avatar tier-{{ player.tier }}">{{ player.avatar or '⚔️' }}</div>
     <div class="profile-info">
-        <div class="profile-name">{{ player.username }}</div>
+        <div class="profile-name">{{ player.username }}<span class="tier-label tier-{{ player.tier }}">{{ player.tier }}</span></div>
         <div class="profile-rating">★ {{ player.rating }} рейтинга</div>
         <div class="stats">
             <div class="stat-item stat-win">
@@ -250,6 +300,22 @@ body {
         </div>
     </div>
 </div>
+
+<div class="section-label">ачивки ({{ player.achievements | length }})</div>
+
+{% if player.achievements %}
+<div class="achievements-grid">
+    {% for ach in player.achievements %}
+    <div class="achievement-card">
+        <span class="achievement-icon">{{ ach.icon }}</span>
+        <div class="achievement-name">{{ ach.name }}</div>
+        <div class="achievement-desc">{{ ach.desc }}</div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="no-achievements">пока нет ачивок — сыграй первую дуэль</div>
+{% endif %}
 
 <div class="section-label">последние матчи</div>
 
