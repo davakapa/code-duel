@@ -14,7 +14,13 @@ app.config['SECRET_KEY'] = 'secret123'
 database_url = os.environ.get('DATABASE_URL', 'sqlite:///codeduel.db')
 if database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
+# Neon требует SSL
+if 'neon.tech' in database_url and 'sslmode' not in database_url:
+    database_url += '?sslmode=require'
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'connect_args': {'sslmode': 'require'} if 'neon.tech' in database_url else {}
+}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
