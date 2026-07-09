@@ -108,6 +108,24 @@ body {
     border-radius: 100px;
 }
 
+.sound-toggle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--bg-input);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s;
+}
+
+.sound-toggle:hover { border-color: var(--ember); }
+.sound-toggle.muted { opacity: 0.5; }
+
 .round-banner {
     position: fixed;
     top: 90px;
@@ -439,6 +457,7 @@ textarea {
     <div class="logo"><div class="logo-mark">⚔</div>Code Duel</div>
     <div class="round-score mono" id="round-score" style="display: none;"></div>
     <div class="timer" id="timer">05:00</div>
+    <button class="sound-toggle" id="sound-toggle" title="звук вкл/выкл">🔊</button>
     <div class="players" id="players-display"></div>
 </div>
 
@@ -513,6 +532,89 @@ textarea {
     let roundsTotal = 1;
     let currentRound = 1;
     let currentScores = {};
+    let tickPlayed = new Set();
+
+    // --- Звуковой движок (синтез через Web Audio, без файлов) ---
+    let audioCtx = null;
+    let soundEnabled = localStorage.getItem('duel_sound') !== 'off';
+
+    function getAudioCtx() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+    }
+
+    function playTone(freq, duration, type, startTime, volume) {
+        if (!soundEnabled) return;
+        type = type || 'sine';
+        volume = volume === undefined ? 0.18 : volume;
+        const ctx = getAudioCtx();
+        const t0 = ctx.currentTime + (startTime || 0);
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t0);
+        gain.gain.setValueAtTime(volume, t0);
+        gain.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t0);
+        osc.stop(t0 + duration);
+    }
+
+    const sounds = {
+        roundStart: function() {
+            playTone(440, 0.12, 'triangle', 0, 0.15);
+            playTone(660, 0.18, 'triangle', 0.1, 0.15);
+        },
+        testPass: function() {
+            playTone(880, 0.1, 'sine', 0, 0.12);
+        },
+        testFail: function() {
+            playTone(180, 0.18, 'sawtooth', 0, 0.1);
+        },
+        victory: function() {
+            playTone(523, 0.15, 'triangle', 0, 0.2);
+            playTone(659, 0.15, 'triangle', 0.13, 0.2);
+            playTone(784, 0.25, 'triangle', 0.26, 0.22);
+            playTone(1046, 0.35, 'triangle', 0.4, 0.2);
+        },
+        defeat: function() {
+            playTone(300, 0.2, 'sawtooth', 0, 0.15);
+            playTone(220, 0.25, 'sawtooth', 0.18, 0.15);
+            playTone(160, 0.4, 'sawtooth', 0.38, 0.15);
+        },
+        tick: function() {
+            playTone(900, 0.06, 'square', 0, 0.08);
+        },
+        roundWon: function() {
+            playTone(660, 0.12, 'triangle', 0, 0.18);
+            playTone(880, 0.2, 'triangle', 0.1, 0.18);
+        }
+    };
+
+    // Разблокировка аудио по первому клику (требование браузеров)
+    document.addEventListener('click', function unlockAudio() {
+        getAudioCtx();
+        document.removeEventListener('click', unlockAudio);
+    }, { once: true });
+
+    // Переключатель звука
+    const soundToggleBtn = document.getElementById('sound-toggle');
+    function renderSoundToggle() {
+        soundToggleBtn.textContent = soundEnabled ? '🔊' : '🔇';
+        soundToggleBtn.classList.toggle('muted', !soundEnabled);
+    }
+    renderSoundToggle();
+    soundToggleBtn.addEventListener('click', function() {
+        soundEnabled = !soundEnabled;
+        localStorage.setItem('duel_sound', soundEnabled ? 'on' : 'off');
+        renderSoundToggle();
+        if (soundEnabled) playTone(660, 0.1, 'sine', 0, 0.15);
+    });
+
 
     const codeEditor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
         mode: 'python',
@@ -573,6 +675,7 @@ textarea {
         matchStartTime = Date.now();
         const totalSeconds = 300;
         const endTime = Date.now() + totalSeconds * 1000;
+        tickPlayed = new Set();
 
         timerInterval = setInterval(function() {
             const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
@@ -581,6 +684,10 @@ textarea {
             const el = document.getElementById('timer');
             el.textContent = m + ':' + s;
             if (remaining <= 60) el.classList.add('danger');
+            if (remaining <= 10 && remaining > 0 && !tickPlayed.has(remaining)) {
+                tickPlayed.add(remaining);
+                sounds.tick();
+            }
             if (remaining <= 0) {
                 clearInterval(timerInterval);
                 showResult(false, 'draw', 'время вышло!', 'никто не успел решить задачу', null);
@@ -714,7 +821,12 @@ textarea {
 
         overlay.style.display = 'flex';
 
-        if (won) spawnConfetti();
+        if (won) {
+            spawnConfetti();
+            sounds.victory();
+        } else if (type !== 'draw') {
+            sounds.defeat();
+        }
     }
 
     function updateRoundScore() {
@@ -754,6 +866,8 @@ textarea {
         document.getElementById('submit-btn').disabled = false;
         document.getElementById('results-display').innerHTML = '';
         document.getElementById('result-text').textContent = '';
+
+        sounds.roundStart();
     }
 
     function showRoundBanner(text) {
@@ -779,6 +893,7 @@ textarea {
         clearInterval(timerInterval);
         const won = data.username === username;
         showRoundBanner(won ? '🏆 ты выиграл раунд ' + currentRound : '😔 раунд выиграл ' + data.username);
+        sounds.roundWon();
     });
 
     socket.on('rating_update', function(data) {
@@ -791,6 +906,11 @@ textarea {
         document.getElementById('results-display').innerHTML =
             data.results.map(function(r) { return '<span class="result-badge">' + r + '</span>'; }).join('');
         document.getElementById('result-text').textContent = data.passed + '/' + data.total + ' тестов';
+        if (data.passed === data.total && data.total > 0) {
+            sounds.testPass();
+        } else {
+            sounds.testFail();
+        }
     });
 
     socket.on('opponent_finished', function(data) {
