@@ -7,603 +7,285 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0b09;--raised:#181410;--input:#211c17;--line:#2e2820;--text:#f0ebe2;--dim:#7a7268;--ember:#ff7a3d;--gold:#ffc14d;--ok:#6fd98c;--loss:#ff5e5e}
 
-:root {
-    --bg: #14110f;
-    --bg-raised: #1c1815;
-    --bg-input: #221d19;
-    --line: #34302a;
-    --text: #f2ede4;
-    --text-dim: #8a8278;
-    --ember: #ff7a3d;
-    --gold: #ffc14d;
-    --ok: #6fd98c;
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+
+/* Animated grid */
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(255,122,61,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,122,61,0.025) 1px,transparent 1px);background-size:80px 80px;z-index:0;animation:gridMove 20s linear infinite}
+@keyframes gridMove{0%{background-position:0 0}100%{background-position:80px 80px}}
+
+/* Orbs */
+.orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0;animation:orbFloat 10s ease-in-out infinite}
+.orb1{width:500px;height:500px;background:rgba(255,122,61,0.05);top:-150px;left:-100px}
+.orb2{width:400px;height:400px;background:rgba(255,193,77,0.04);bottom:-100px;right:-100px;animation-delay:-5s}
+.orb3{width:300px;height:300px;background:rgba(111,217,140,0.03);top:40%;left:40%;animation-delay:-2s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(20px,-15px) scale(1.05)}66%{transform:translate(-15px,20px) scale(0.95)}}
+
+/* Particles */
+.particles{position:fixed;inset:0;pointer-events:none;z-index:0}
+.particle{position:absolute;border-radius:50%;animation:floatUp linear infinite;opacity:0}
+@keyframes floatUp{0%{transform:translateY(100vh) scale(0);opacity:0}5%{opacity:1;transform:translateY(90vh) scale(1)}90%{opacity:0.8}100%{transform:translateY(-5vh) scale(0.5);opacity:0}}
+
+/* Header */
+.header{position:relative;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:20px 40px;border-bottom:1px solid var(--line);background:rgba(13,11,9,0.8);backdrop-filter:blur(20px);animation:slideDown 0.5s ease both}
+@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}
+
+.logo{font-weight:700;font-size:21px;display:flex;align-items:center;gap:10px}
+.logo-mark{width:28px;height:28px;background:var(--ember);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--bg);animation:logoPulse 2s ease-in-out infinite;box-shadow:0 0 20px rgba(255,122,61,0.4)}
+@keyframes logoPulse{0%,100%{box-shadow:0 0 20px rgba(255,122,61,0.4)}50%{box-shadow:0 0 40px rgba(255,122,61,0.7)}}
+
+.nav{display:flex;gap:24px;align-items:center}
+.nav a{color:var(--dim);text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;position:relative}
+.nav a::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:var(--ember);transform:scaleX(0);transition:transform 0.2s}
+.nav a:hover{color:var(--text)}
+.nav a:hover::after{transform:scaleX(1)}
+
+.rank-pill{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--raised);border:1px solid var(--line);padding:6px 14px 6px 6px;border-radius:100px;color:var(--gold);display:inline-flex;align-items:center;gap:8px;transition:all 0.3s}
+.rank-pill:hover{border-color:var(--gold);box-shadow:0 0 12px rgba(255,193,77,0.2)}
+.rank-avatar{width:22px;height:22px;border-radius:50%;background:var(--input);display:flex;align-items:center;justify-content:center;font-size:12px}
+
+/* Main */
+.main{flex:1;display:flex;justify-content:center;align-items:center;position:relative;z-index:1}
+
+.container{text-align:center;width:460px;padding:20px;animation:containerEnter 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.2s both}
+@keyframes containerEnter{from{opacity:0;transform:translateY(40px) scale(0.95)}to{opacity:1;transform:none}}
+
+/* Hero title with animation */
+.hero-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ember);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;animation:fadeIn 0.6s 0.3s both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+h1{font-size:40px;font-weight:700;line-height:1.15;margin-bottom:10px;animation:fadeIn 0.6s 0.4s both}
+h1 span{
+  color:var(--ember);
+  display:inline-block;
+  animation:glowText 3s ease-in-out infinite;
 }
+@keyframes glowText{0%,100%{text-shadow:0 0 20px rgba(255,122,61,0.4)}50%{text-shadow:0 0 40px rgba(255,122,61,0.8),0 0 80px rgba(255,122,61,0.3)}}
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+.hero-sub{color:var(--dim);font-size:15px;margin-bottom:32px;animation:fadeIn 0.6s 0.5s both}
 
-body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Space Grotesk', sans-serif;
-    min-height: 100vh;
-    background-image:
-        radial-gradient(circle at 15% 20%, rgba(255,122,61,0.04), transparent 40%),
-        radial-gradient(circle at 85% 80%, rgba(255,193,77,0.04), transparent 40%);
-}
+/* Ladder */
+.ladder{display:flex;justify-content:center;align-items:flex-end;gap:8px;margin-bottom:36px;height:90px;animation:fadeIn 0.6s 0.6s both}
+.ladder-step{width:60px;border-radius:8px 8px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);background:var(--raised);border:1px solid var(--line);color:var(--dim);opacity:0.35}
+.ladder-step.s1{height:40%}
+.ladder-step.s2{height:65%}
+.ladder-step.s3{height:100%}
+.ladder-step.lit{opacity:1;transform:translateY(-8px)}
+.ladder-step.lit.s1{color:var(--ok);border-color:var(--ok);box-shadow:0 0 20px rgba(111,217,140,0.3),0 -2px 0 var(--ok)}
+.ladder-step.lit.s2{color:var(--gold);border-color:var(--gold);box-shadow:0 0 20px rgba(255,193,77,0.3),0 -2px 0 var(--gold)}
+.ladder-step.lit.s3{color:var(--ember);border-color:var(--ember);box-shadow:0 0 25px rgba(255,122,61,0.4),0 -2px 0 var(--ember);background:linear-gradient(180deg,rgba(255,122,61,0.15),var(--raised))}
 
-.mono { font-family: 'IBM Plex Mono', monospace; }
+/* Difficulty cards */
+.diff-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.diff-card{background:var(--raised);border:1px solid var(--line);border-radius:14px;padding:16px 12px;cursor:pointer;transition:all 0.25s;text-align:left;position:relative;overflow:hidden}
+.diff-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.03),transparent);opacity:0;transition:opacity 0.3s}
+.diff-card:hover{border-color:var(--dim);transform:translateY(-3px)}
+.diff-card:hover::before{opacity:1}
+.diff-card.active{background:var(--input)}
+.diff-card[data-d="easy"].active{border-color:var(--ok);box-shadow:0 0 20px rgba(111,217,140,0.15)}
+.diff-card[data-d="medium"].active{border-color:var(--gold);box-shadow:0 0 20px rgba(255,193,77,0.15)}
+.diff-card[data-d="hard"].active{border-color:var(--ember);box-shadow:0 0 20px rgba(255,122,61,0.15)}
+.diff-icon{font-size:18px;margin-bottom:8px;display:block}
+.diff-title{font-weight:600;font-size:14px;margin-bottom:3px}
+.diff-card[data-d="easy"] .diff-title{color:var(--ok)}
+.diff-card[data-d="medium"] .diff-title{color:var(--gold)}
+.diff-card[data-d="hard"] .diff-title{color:var(--ember)}
+.diff-stake{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim)}
 
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 22px 40px;
-}
+/* Mini selects */
+.mini-select-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.mini-select-label{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;text-align:left}
+.mini-select-buttons{display:flex;gap:6px}
+.mini-btn{flex:1;padding:9px 6px;background:var(--raised);border:1px solid var(--line);border-radius:8px;color:var(--dim);font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;width:auto;margin:0}
+.mini-btn:hover{border-color:var(--dim);color:var(--text)}
+.mini-btn.active{background:var(--input);border-color:var(--gold);color:var(--gold)}
+.diff-cards.disabled{opacity:0.3;pointer-events:none}
 
-.logo {
-    font-weight: 700;
-    font-size: 21px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+/* Search box */
+.searching-box{display:none;background:var(--raised);border:1px solid var(--ember);border-radius:14px;padding:22px;margin-bottom:14px;animation:pulse-border 1.5s ease-in-out infinite}
+@keyframes pulse-border{0%,100%{box-shadow:0 0 0 0 rgba(255,122,61,0.3)}50%{box-shadow:0 0 0 6px rgba(255,122,61,0)}}
+.searching-dots{font-size:24px;letter-spacing:6px;color:var(--ember);animation:dotPulse 1.5s ease-in-out infinite}
+@keyframes dotPulse{0%,100%{opacity:1;letter-spacing:6px}50%{opacity:0.4;letter-spacing:10px}}
+.searching-meta{margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dim)}
 
-.logo-mark {
-    width: 28px;
-    height: 28px;
-    background: var(--ember);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--bg);
-}
+/* CTA buttons */
+.cta-main{width:100%;padding:17px;background:linear-gradient(135deg,var(--ember),#ff5e3d);color:#1a0f08;border:none;border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;margin-bottom:14px;transition:all 0.25s;position:relative;overflow:hidden}
+.cta-main::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,0.15),transparent);transform:translateX(-100%);transition:transform 0.6s}
+.cta-main:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(255,122,61,0.4)}
+.cta-main:hover::before{transform:translateX(100%)}
+.cta-main:active{transform:translateY(0)}
 
-.nav { display: flex; gap: 24px; align-items: center; }
+.cta-cancel{width:100%;padding:13px;background:transparent;border:1px solid var(--ember);color:var(--ember);border-radius:14px;font-weight:600;font-size:14px;cursor:pointer;margin-bottom:14px;display:none;transition:all 0.2s}
+.cta-cancel:hover{background:rgba(255,122,61,0.1)}
 
-.nav a {
-    color: var(--text-dim);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-}
+.alt-row{display:flex;align-items:center;gap:14px;margin:18px 0}
+.alt-row .line{flex:1;height:1px;background:var(--line)}
+.alt-row span{font-size:12px;color:var(--dim)}
 
-.nav a:hover { color: var(--text); }
+.split-actions{display:flex;gap:10px}
+.btn-ghost{flex:1;padding:13px;background:transparent;border:1px solid var(--line);border-radius:14px;color:var(--text);font-weight:500;font-size:14px;cursor:pointer;transition:all 0.2s}
+.btn-ghost:hover{background:var(--raised);border-color:var(--dim)}
 
-.nav .rank-pill {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    background: var(--bg-raised);
-    border: 1px solid var(--line);
-    padding: 6px 14px 6px 6px;
-    border-radius: 100px;
-    color: var(--gold);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
+.room-input{flex:1;padding:13px;background:var(--input);border:1px solid var(--line);border-radius:14px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;outline:none;text-align:center;transition:all 0.3s}
+.room-input::placeholder{color:var(--dim)}
+.room-input:focus{border-color:var(--ember);box-shadow:0 0 12px rgba(255,122,61,0.15)}
 
-.nav .rank-avatar {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--bg-input);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-}
+.friend-hint{text-align:center;font-size:11px;color:var(--dim);font-family:'IBM Plex Mono',monospace;margin-bottom:12px;transition:all 0.3s}
 
-.hero {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 30px 24px 40px;
-    text-align: center;
-}
+.error-text{color:var(--ember);font-size:13px;text-align:center;margin-top:8px;min-height:18px}
 
-.hero-eyebrow {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    color: var(--ember);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 16px;
-}
-
-.hero h1 {
-    font-size: 38px;
-    font-weight: 700;
-    line-height: 1.15;
-    margin-bottom: 12px;
-}
-
-.hero h1 span { color: var(--ember); }
-
-.hero-sub {
-    color: var(--text-dim);
-    font-size: 15px;
-    margin-bottom: 36px;
-}
-
-.ladder {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    gap: 8px;
-    margin-bottom: 40px;
-    height: 90px;
-}
-
-.ladder-step {
-    width: 60px;
-    border-radius: 8px 8px 0 0;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 10px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    font-weight: 500;
-    transition: all 0.25s ease;
-    background: var(--bg-raised);
-    border: 1px solid var(--line);
-    color: var(--text-dim);
-    opacity: 0.4;
-}
-
-.ladder-step.s1 { height: 40%; }
-.ladder-step.s2 { height: 65%; }
-.ladder-step.s3 { height: 100%; }
-
-.ladder-step.lit {
-    opacity: 1;
-    transform: translateY(-6px);
-}
-
-.ladder-step.lit.s1 { color: var(--ok); border-color: var(--ok); box-shadow: 0 0 0 1px var(--ok) inset; }
-.ladder-step.lit.s2 { color: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
-.ladder-step.lit.s3 {
-    color: var(--ember);
-    border-color: var(--ember);
-    box-shadow: 0 0 0 1px var(--ember) inset;
-    background: linear-gradient(180deg, rgba(255,122,61,0.18), var(--bg-raised));
-}
-
-.diff-cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 28px;
-}
-
-.diff-card {
-    background: var(--bg-raised);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 18px 14px;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-align: left;
-}
-
-.diff-card:hover { border-color: var(--text-dim); }
-
-.diff-card.active { background: var(--bg-input); }
-
-.diff-card[data-d="easy"].active { border-color: var(--ok); box-shadow: 0 0 0 1px var(--ok) inset; }
-.diff-card[data-d="medium"].active { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
-.diff-card[data-d="hard"].active { border-color: var(--ember); box-shadow: 0 0 0 1px var(--ember) inset; }
-
-.diff-icon { font-size: 18px; margin-bottom: 10px; display: block; }
-.diff-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
-.diff-card[data-d="easy"] .diff-title { color: var(--ok); }
-.diff-card[data-d="medium"] .diff-title { color: var(--gold); }
-.diff-card[data-d="hard"] .diff-title { color: var(--ember); }
-.diff-stake { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-dim); }
-
-.cta-main {
-    width: 100%;
-    padding: 18px;
-    background: linear-gradient(135deg, var(--ember), #ff5e3d);
-    color: #1a0f08;
-    border: none;
-    border-radius: 14px;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    margin-bottom: 16px;
-    transition: transform 0.12s;
-}
-
-.cta-main:hover { transform: translateY(-1px); }
-.cta-main:active { transform: translateY(0); }
-
-.cta-cancel {
-    width: 100%;
-    padding: 14px;
-    background: transparent;
-    border: 1px solid var(--ember);
-    color: var(--ember);
-    border-radius: 14px;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    margin-bottom: 16px;
-    display: none;
-}
-
-.searching-box {
-    display: none;
-    background: var(--bg-raised);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 22px;
-    margin-bottom: 16px;
-    text-align: center;
-}
-
-.searching-dots {
-    font-size: 22px;
-    letter-spacing: 6px;
-    color: var(--ember);
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-.searching-meta {
-    margin-top: 8px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    color: var(--text-dim);
-}
-
-.alt-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin: 22px 0;
-}
-
-.alt-row .line { flex: 1; height: 1px; background: var(--line); }
-.alt-row span { font-size: 12px; color: var(--text-dim); }
-
-.friend-hint {
-    text-align: center;
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-bottom: 14px;
-}
-
-.mini-select-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 20px;
-}
-
-.mini-select-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-    text-align: left;
-}
-
-.mini-select-buttons {
-    display: flex;
-    gap: 6px;
-}
-
-.mini-btn {
-    flex: 1;
-    padding: 9px 6px;
-    background: var(--bg-raised);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    color: var(--text-dim);
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
-    width: auto;
-    margin-bottom: 0;
-}
-
-.mini-btn:hover { border-color: var(--text-dim); color: var(--text); }
-
-.mini-btn.active {
-    background: var(--bg-input);
-    border-color: var(--gold);
-    color: var(--gold);
-}
-
-.diff-cards.disabled {
-    opacity: 0.35;
-    pointer-events: none;
-}
-
-.split-actions { display: flex; gap: 10px; }
-
-.btn-ghost {
-    flex: 1;
-    padding: 14px;
-    background: transparent;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    color: var(--text);
-    font-weight: 500;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.btn-ghost:hover { background: var(--bg-raised); }
-
-.room-input {
-    flex: 1;
-    padding: 14px;
-    background: var(--bg-input);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    color: var(--text);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 14px;
-    outline: none;
-    text-align: center;
-}
-
-.room-input::placeholder { color: var(--text-dim); }
-.room-input:focus { border-color: var(--ember); }
-
-.error-text {
-    color: var(--ember);
-    font-size: 13px;
-    text-align: center;
-    margin-top: 8px;
-    min-height: 18px;
-}
-
-.footer-links {
-    display: flex;
-    justify-content: center;
-    gap: 28px;
-    margin-top: 24px;
-}
-
-.footer-links a {
-    color: var(--text-dim);
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
-}
-
-.footer-links a:hover { color: var(--gold); }
+.footer-links{display:flex;justify-content:center;gap:28px;margin-top:22px}
+.footer-links a{color:var(--dim);text-decoration:none;font-size:13px;font-weight:500;transition:all 0.2s;position:relative}
+.footer-links a:hover{color:var(--gold)}
 </style>
 </head>
 <body>
+<div class="grid-bg"></div>
+<div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+<div class="particles" id="particles"></div>
 
 <div class="header">
-    <div class="logo">
-        <div class="logo-mark">⚔</div>
-        Code Duel
-    </div>
-    <div class="nav">
-        <span class="rank-pill"><span class="rank-avatar">{{ player.avatar if player else '⚔️' }}</span>★ {{ username }}{% if player %} · {{ player.rating }}{% endif %}</span>
-        <a href="/profile/{{ username }}">профиль</a>
-        <a href="/leaderboard">рейтинг</a>
-        <a href="/logout">выйти</a>
-    </div>
+  <div class="logo"><div class="logo-mark">⚔</div>Code Duel</div>
+  <div class="nav">
+    <span class="rank-pill"><span class="rank-avatar">{{ player.avatar if player else '⚔️' }}</span>★ {{ username }}{% if player %} · {{ player.rating }}{% endif %}</span>
+    <a href="/profile/{{ username }}">профиль</a>
+    <a href="/leaderboard">рейтинг</a>
+    <a href="/logout">выйти</a>
+  </div>
 </div>
 
-<div class="hero">
+<div class="main">
+  <div class="container">
     <div class="hero-eyebrow">ranked 1v1 · live</div>
     <h1>Докажи, что ты<br><span>сильнейший</span> кодер</h1>
     <p class="hero-sub">Привет, {{ username }} — выбери ставку и иди в бой</p>
 
     <div class="ladder">
-        <div class="ladder-step s1 mono" data-step="easy">easy</div>
-        <div class="ladder-step s2 mono" data-step="medium">med</div>
-        <div class="ladder-step s3 mono" data-step="hard">hard</div>
+      <div class="ladder-step s1 mono" data-step="easy">easy</div>
+      <div class="ladder-step s2 mono" data-step="medium">med</div>
+      <div class="ladder-step s3 mono" data-step="hard">hard</div>
     </div>
 
     <div class="diff-cards" id="diff-cards-block">
-        <div class="diff-card active" data-d="easy">
-            <span class="diff-icon">🟢</span>
-            <div class="diff-title">Easy</div>
-            <div class="diff-stake">+25 win · −50 loss</div>
-        </div>
-        <div class="diff-card" data-d="medium">
-            <span class="diff-icon">🟡</span>
-            <div class="diff-title">Medium</div>
-            <div class="diff-stake">+50 win · −25 loss</div>
-        </div>
-        <div class="diff-card" data-d="hard">
-            <span class="diff-icon">🔴</span>
-            <div class="diff-title">Hard</div>
-            <div class="diff-stake">+100 win · −10 loss</div>
-        </div>
+      <div class="diff-card active" data-d="easy"><span class="diff-icon">🟢</span><div class="diff-title">Easy</div><div class="diff-stake">+25 win · −50 loss</div></div>
+      <div class="diff-card" data-d="medium"><span class="diff-icon">🟡</span><div class="diff-title">Medium</div><div class="diff-stake">+50 win · −25 loss</div></div>
+      <div class="diff-card" data-d="hard"><span class="diff-icon">🔴</span><div class="diff-title">Hard</div><div class="diff-stake">+100 win · −10 loss</div></div>
     </div>
 
     <div class="mini-select-row">
-        <div class="mini-select-group">
-            <div class="mini-select-label">тип задач</div>
-            <div class="mini-select-buttons">
-                <button class="mini-btn active" data-mode="general">алгоритмы</button>
-                <button class="mini-btn" data-mode="ege">ЕГЭ инфо</button>
-            </div>
-        </div>
-        <div class="mini-select-group">
-            <div class="mini-select-label">формат</div>
-            <div class="mini-select-buttons">
-                <button class="mini-btn active" data-rounds="1">1 раунд</button>
-                <button class="mini-btn" data-rounds="3">best of 3</button>
-            </div>
-        </div>
+      <div><div class="mini-select-label">тип задач</div><div class="mini-select-buttons"><button class="mini-btn active" data-mode="general">алгоритмы</button><button class="mini-btn" data-mode="ege">ЕГЭ инфо</button></div></div>
+      <div><div class="mini-select-label">формат</div><div class="mini-select-buttons"><button class="mini-btn active" data-rounds="1">1 раунд</button><button class="mini-btn" data-rounds="3">best of 3</button></div></div>
     </div>
 
     <div class="searching-box" id="searching-box">
-        <div class="searching-dots">● ● ●</div>
-        <div class="searching-meta" id="searching-meta">ищем соперника на easy...</div>
-        <div class="searching-meta" id="search-timer">0 сек</div>
+      <div class="searching-dots">● ● ●</div>
+      <div class="searching-meta" id="searching-meta">ищем соперника...</div>
+      <div class="searching-meta" id="search-timer">0 сек</div>
     </div>
 
     <button class="cta-main" id="btn-find">⚡ найти соперника</button>
     <button class="cta-cancel" id="btn-cancel">✕ отменить поиск</button>
 
-    <div class="alt-row">
-        <div class="line"></div>
-        <span>или сыграй с другом</span>
-        <div class="line"></div>
-    </div>
+    <div class="alt-row"><div class="line"></div><span>или сыграй с другом</span><div class="line"></div></div>
 
     <div class="friend-hint mono" id="friend-hint">комната создастся со сложностью: easy</div>
-
     <div class="split-actions">
-        <button class="btn-ghost" id="btn-create">создать комнату</button>
-        <input class="room-input" id="room_code" placeholder="код комнаты" maxlength="8" />
+      <button class="btn-ghost" id="btn-create">создать комнату</button>
+      <input class="room-input" id="room_code" placeholder="код комнаты" maxlength="8"/>
     </div>
-    <button class="btn-ghost" id="btn-join" style="width: 100%; margin-top: 10px;">войти в комнату</button>
+    <button class="btn-ghost" id="btn-join" style="width:100%;margin-top:10px">войти в комнату</button>
 
     <div class="error-text" id="error"></div>
 
     <div class="footer-links">
-        <a href="/leaderboard">таблица лидеров</a>
-        <a href="/profile/{{ username }}">мой профиль</a>
+      <a href="/leaderboard">таблица лидеров</a>
+      <a href="/profile/{{ username }}">мой профиль</a>
     </div>
+  </div>
 </div>
 
 <script>
-    const socket = io();
-    const username = "{{ username }}";
-    let selectedDifficulty = 'easy';
-    let selectedMode = 'general';
-    let selectedRounds = 1;
-    let searchTimer = null;
-    let searchSeconds = 0;
+// Particles
+const pc=document.getElementById('particles');
+for(let i=0;i<30;i++){
+  const d=document.createElement('div');d.className='particle';
+  const s=Math.random()*4+2;
+  const colors=['rgba(255,122,61,0.5)','rgba(255,193,77,0.4)','rgba(111,217,140,0.4)'];
+  d.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*3)]};animation-duration:${Math.random()*20+12}s;animation-delay:${Math.random()*20}s`;
+  pc.appendChild(d);
+}
 
-    function syncLadder(diff) {
-        document.querySelectorAll('.ladder-step').forEach(step => {
-            step.classList.toggle('lit', step.dataset.step === diff);
-        });
-        updateFriendHint();
-    }
+const socket=io();
+const username="{{ username }}";
+let selectedDifficulty='easy',selectedMode='general',selectedRounds=1;
+let searchTimer=null,searchSeconds=0;
 
-    function updateFriendHint() {
-        const modeLabel = selectedMode === 'ege' ? 'ЕГЭ инфо' : selectedDifficulty;
-        const roundsLabel = selectedRounds === 3 ? ', best of 3' : '';
-        document.getElementById('friend-hint').textContent =
-            'комната создастся: ' + modeLabel + roundsLabel;
-    }
+function syncLadder(diff){
+  document.querySelectorAll('.ladder-step').forEach(s=>s.classList.toggle('lit',s.dataset.step===diff));
+  updateFriendHint();
+}
+function updateFriendHint(){
+  const ml=selectedMode==='ege'?'ЕГЭ инфо':selectedDifficulty;
+  const rl=selectedRounds===3?', best of 3':'';
+  document.getElementById('friend-hint').textContent='комната создастся: '+ml+rl;
+}
 
-    document.querySelectorAll('.diff-card').forEach(b => {
-        b.addEventListener('click', function() {
-            document.querySelectorAll('.diff-card').forEach(x => x.classList.remove('active'));
-            this.classList.add('active');
-            selectedDifficulty = this.dataset.d;
-            syncLadder(selectedDifficulty);
-        });
-    });
+document.querySelectorAll('.diff-card').forEach(b=>{
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.diff-card').forEach(x=>x.classList.remove('active'));
+    this.classList.add('active');selectedDifficulty=this.dataset.d;syncLadder(selectedDifficulty);
+  });
+});
+document.querySelectorAll('.mini-btn[data-mode]').forEach(b=>{
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.mini-btn[data-mode]').forEach(x=>x.classList.remove('active'));
+    this.classList.add('active');selectedMode=this.dataset.mode;
+    document.getElementById('diff-cards-block').classList.toggle('disabled',selectedMode==='ege');
+    updateFriendHint();
+  });
+});
+document.querySelectorAll('.mini-btn[data-rounds]').forEach(b=>{
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.mini-btn[data-rounds]').forEach(x=>x.classList.remove('active'));
+    this.classList.add('active');selectedRounds=parseInt(this.dataset.rounds);updateFriendHint();
+  });
+});
+syncLadder('easy');
 
-    document.querySelectorAll('.mini-btn[data-mode]').forEach(b => {
-        b.addEventListener('click', function() {
-            document.querySelectorAll('.mini-btn[data-mode]').forEach(x => x.classList.remove('active'));
-            this.classList.add('active');
-            selectedMode = this.dataset.mode;
-            document.getElementById('diff-cards-block').classList.toggle('disabled', selectedMode === 'ege');
-            updateFriendHint();
-        });
-    });
+function showError(m){document.getElementById('error').textContent=m}
 
-    document.querySelectorAll('.mini-btn[data-rounds]').forEach(b => {
-        b.addEventListener('click', function() {
-            document.querySelectorAll('.mini-btn[data-rounds]').forEach(x => x.classList.remove('active'));
-            this.classList.add('active');
-            selectedRounds = parseInt(this.dataset.rounds);
-            updateFriendHint();
-        });
-    });
-
-    syncLadder('easy');
-
-    function showError(msg) {
-        document.getElementById('error').textContent = msg;
-    }
-
-    document.getElementById('btn-find').addEventListener('click', function() {
-        document.getElementById('searching-box').style.display = 'block';
-        document.getElementById('btn-find').style.display = 'none';
-        document.getElementById('btn-cancel').style.display = 'block';
-        document.getElementById('error').textContent = '';
-
-        const modeLabel = selectedMode === 'ege' ? 'ЕГЭ' : selectedDifficulty;
-        document.getElementById('searching-meta').textContent = 'ищем соперника: ' + modeLabel + (selectedRounds === 3 ? ' · bo3' : '');
-
-        searchSeconds = 0;
-        searchTimer = setInterval(function() {
-            searchSeconds++;
-            document.getElementById('search-timer').textContent = searchSeconds + ' сек';
-        }, 1000);
-
-        socket.emit('find_match', {
-            username: username,
-            difficulty: selectedDifficulty,
-            mode: selectedMode,
-            rounds: selectedRounds
-        });
-    });
-
-    document.getElementById('btn-cancel').addEventListener('click', function() {
-        socket.emit('cancel_search', { username: username });
-        stopSearch();
-    });
-
-    function stopSearch() {
-        clearInterval(searchTimer);
-        document.getElementById('searching-box').style.display = 'none';
-        document.getElementById('btn-find').style.display = 'block';
-        document.getElementById('btn-cancel').style.display = 'none';
-    }
-
-    document.getElementById('btn-create').addEventListener('click', function() {
-        socket.emit('create_room', {
-            username: username,
-            difficulty: selectedDifficulty,
-            mode: selectedMode,
-            rounds: selectedRounds
-        });
-    });
-
-    document.getElementById('btn-join').addEventListener('click', function() {
-        const room_id = document.getElementById('room_code').value.trim();
-        if (!room_id) return showError('Введи код комнаты!');
-        localStorage.setItem('should_join', 'true');
-        window.location.href = '/duel/' + room_id;
-    });
-
-    socket.on('match_found', function(data) {
-        stopSearch();
-        localStorage.setItem('should_join', 'true');
-        localStorage.setItem('from_matchmaking', 'true');
-        window.location.href = '/duel/' + data.room_id;
-    });
-
-    socket.on('room_created', function(data) {
-        window.location.href = '/duel/' + data.room_id;
-    });
-
-    socket.on('search_cancelled', function() { stopSearch(); });
-
-    socket.on('error', function(data) {
-        showError(data.message);
-        stopSearch();
-    });
+document.getElementById('btn-find').addEventListener('click',function(){
+  document.getElementById('searching-box').style.display='block';
+  document.getElementById('btn-find').style.display='none';
+  document.getElementById('btn-cancel').style.display='block';
+  document.getElementById('error').textContent='';
+  const ml=selectedMode==='ege'?'ЕГЭ':selectedDifficulty;
+  document.getElementById('searching-meta').textContent='ищем соперника: '+ml+(selectedRounds===3?' · bo3':'')+'...';
+  searchSeconds=0;
+  searchTimer=setInterval(()=>{searchSeconds++;document.getElementById('search-timer').textContent=searchSeconds+' сек'},1000);
+  socket.emit('find_match',{username,difficulty:selectedDifficulty,mode:selectedMode,rounds:selectedRounds});
+});
+document.getElementById('btn-cancel').addEventListener('click',function(){
+  socket.emit('cancel_search',{username});stopSearch();
+});
+function stopSearch(){
+  clearInterval(searchTimer);
+  document.getElementById('searching-box').style.display='none';
+  document.getElementById('btn-find').style.display='block';
+  document.getElementById('btn-cancel').style.display='none';
+}
+document.getElementById('btn-create').addEventListener('click',()=>socket.emit('create_room',{username,difficulty:selectedDifficulty,mode:selectedMode,rounds:selectedRounds}));
+document.getElementById('btn-join').addEventListener('click',function(){
+  const r=document.getElementById('room_code').value.trim();
+  if(!r)return showError('Введи код комнаты!');
+  localStorage.setItem('should_join','true');window.location.href='/duel/'+r;
+});
+socket.on('match_found',d=>{stopSearch();localStorage.setItem('should_join','true');localStorage.setItem('from_matchmaking','true');window.location.href='/duel/'+d.room_id});
+socket.on('room_created',d=>{window.location.href='/duel/'+d.room_id});
+socket.on('search_cancelled',stopSearch);
+socket.on('error',d=>{showError(d.message);stopSearch()});
 </script>
 </body>
 </html>

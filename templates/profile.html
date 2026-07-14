@@ -6,336 +6,189 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0b09;--raised:#181410;--input:#211c17;--line:#2e2820;--text:#f0ebe2;--dim:#7a7268;--ember:#ff7a3d;--gold:#ffc14d;--ok:#6fd98c;--loss:#ff5e5e}
 
-:root {
-    --bg: #14110f;
-    --bg-raised: #1c1815;
-    --bg-input: #221d19;
-    --line: #34302a;
-    --text: #f2ede4;
-    --text-dim: #8a8278;
-    --ember: #ff7a3d;
-    --gold: #ffc14d;
-    --ok: #6fd98c;
-    --loss: #ff5e5e;
-}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden}
 
-body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Space Grotesk', sans-serif;
-    min-height: 100vh;
-    background-image:
-        radial-gradient(circle at 15% 10%, rgba(255,122,61,0.04), transparent 40%),
-        radial-gradient(circle at 85% 90%, rgba(255,193,77,0.04), transparent 40%);
-}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(111,217,140,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(111,217,140,0.02) 1px,transparent 1px);background-size:80px 80px;z-index:0;animation:gridMove 20s linear infinite}
+@keyframes gridMove{0%{background-position:0 0}100%{background-position:80px 80px}}
 
-.mono { font-family: 'IBM Plex Mono', monospace; }
+.orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0;animation:orbFloat 10s ease-in-out infinite}
+.orb1{width:400px;height:400px;background:rgba(111,217,140,0.05);top:-100px;left:-100px}
+.orb2{width:300px;height:300px;background:rgba(255,193,77,0.04);bottom:-80px;right:-80px;animation-delay:-5s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-15px)}}
 
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 22px 40px;
-}
+.particles{position:fixed;inset:0;pointer-events:none;z-index:0}
+.particle{position:absolute;border-radius:50%;animation:floatUp linear infinite;opacity:0}
+@keyframes floatUp{0%{transform:translateY(100vh);opacity:0}10%{opacity:1}90%{opacity:0.8}100%{transform:translateY(-5vh);opacity:0}}
 
-.logo {
-    font-weight: 700;
-    font-size: 21px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    color: var(--text);
-}
+.header{position:relative;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:20px 40px;border-bottom:1px solid var(--line);background:rgba(13,11,9,0.85);backdrop-filter:blur(20px);animation:slideDown 0.5s ease both}
+@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}
 
-.logo-mark {
-    width: 28px;
-    height: 28px;
-    background: var(--ember);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--bg);
-}
+.logo{font-weight:700;font-size:21px;display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.logo-mark{width:28px;height:28px;background:var(--ember);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--bg);box-shadow:0 0 20px rgba(255,122,61,0.4);animation:logoPulse 2s ease-in-out infinite}
+@keyframes logoPulse{0%,100%{box-shadow:0 0 20px rgba(255,122,61,0.4)}50%{box-shadow:0 0 40px rgba(255,122,61,0.7)}}
+.nav{display:flex;gap:24px}
+.nav a{color:var(--dim);text-decoration:none;font-size:14px;font-weight:500;transition:color 0.2s}
+.nav a:hover{color:var(--text)}
 
-.nav { display: flex; gap: 24px; align-items: center; }
+.page{max-width:660px;margin:0 auto;padding:36px 24px 60px;position:relative;z-index:1}
 
-.nav a {
-    color: var(--text-dim);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-}
+/* Profile card */
+.profile-card{background:var(--raised);border:1px solid var(--line);border-radius:20px;padding:30px;display:flex;align-items:center;gap:24px;margin-bottom:28px;animation:cardEnter 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;position:relative;overflow:hidden}
+@keyframes cardEnter{from{opacity:0;transform:translateY(20px) scale(0.97)}to{opacity:1;transform:none}}
 
-.nav a:hover { color: var(--text); }
+.profile-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.02),transparent);pointer-events:none}
+.profile-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,122,61,0.3),transparent);animation:scanLine 3s ease-in-out infinite}
+@keyframes scanLine{0%,100%{opacity:0.5}50%{opacity:1}}
 
-.page {
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 20px 24px 60px;
-}
+.avatar{width:80px;height:80px;border-radius:50%;background:var(--input);display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;border:3px solid var(--line);transition:all 0.3s;animation:avatarEnter 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.4s both}
+@keyframes avatarEnter{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
+.avatar:hover{transform:scale(1.08) rotate(5deg)}
 
-.profile-card {
-    background: var(--bg-raised);
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    padding: 32px;
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    margin-bottom: 32px;
-}
+.avatar.tier-bronze{border-color:#b08d57;box-shadow:0 0 16px rgba(176,141,87,0.3)}
+.avatar.tier-silver{border-color:#c7d0d9;box-shadow:0 0 16px rgba(199,208,217,0.35)}
+.avatar.tier-gold{border-color:var(--gold);box-shadow:0 0 20px rgba(255,193,77,0.4);animation:avatarEnter 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.4s both,goldGlow 2s ease-in-out 1.2s infinite}
+@keyframes goldGlow{0%,100%{box-shadow:0 0 20px rgba(255,193,77,0.4)}50%{box-shadow:0 0 40px rgba(255,193,77,0.7)}}
+.avatar.tier-platinum{border-color:#7fe8d8;box-shadow:0 0 20px rgba(127,232,216,0.4);animation:avatarEnter 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.4s both,platinumGlow 2s ease-in-out 1.2s infinite}
+@keyframes platinumGlow{0%,100%{box-shadow:0 0 20px rgba(127,232,216,0.4)}50%{box-shadow:0 0 50px rgba(127,232,216,0.8)}}
 
-.avatar {
-    width: 76px;
-    height: 76px;
-    border-radius: 50%;
-    background: var(--bg-input);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 34px;
-    flex-shrink: 0;
-    border: 3px solid var(--line);
-}
+.tier-label{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:3px 10px;border-radius:100px;margin-left:8px;vertical-align:middle}
+.tier-label.tier-bronze{background:rgba(176,141,87,0.15);color:#d4b483;border:1px solid #b08d57}
+.tier-label.tier-silver{background:rgba(199,208,217,0.15);color:#e1e7ec;border:1px solid #c7d0d9}
+.tier-label.tier-gold{background:rgba(255,193,77,0.15);color:var(--gold);border:1px solid var(--gold)}
+.tier-label.tier-platinum{background:rgba(127,232,216,0.15);color:#7fe8d8;border:1px solid #7fe8d8}
 
-.avatar.tier-bronze { border-color: #b08d57; box-shadow: 0 0 14px rgba(176,141,87,0.3); }
-.avatar.tier-silver { border-color: #c7d0d9; box-shadow: 0 0 14px rgba(199,208,217,0.35); }
-.avatar.tier-gold { border-color: var(--gold); box-shadow: 0 0 16px rgba(255,193,77,0.4); }
-.avatar.tier-platinum { border-color: #7fe8d8; box-shadow: 0 0 18px rgba(127,232,216,0.45); }
+.profile-info{flex:1}
+.profile-name{font-size:26px;font-weight:700;margin-bottom:4px;animation:fadeIn 0.6s 0.5s both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.profile-rating{font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--gold);margin-bottom:16px;animation:fadeIn 0.6s 0.6s both}
 
-.tier-label {
-    display: inline-block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 3px 10px;
-    border-radius: 100px;
-    margin-left: 8px;
-    vertical-align: middle;
-}
+.stats{display:flex;gap:24px;animation:fadeIn 0.6s 0.7s both}
+.stat-item{text-align:center}
+.stat-value{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:700;display:block}
+.stat-label{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+.stat-win .stat-value{color:var(--ok)}
+.stat-loss .stat-value{color:var(--loss)}
+.stat-wr .stat-value{color:var(--gold)}
 
-.tier-label.tier-bronze { background: rgba(176,141,87,0.15); color: #d4b483; border: 1px solid #b08d57; }
-.tier-label.tier-silver { background: rgba(199,208,217,0.15); color: #e1e7ec; border: 1px solid #c7d0d9; }
-.tier-label.tier-gold { background: rgba(255,193,77,0.15); color: var(--gold); border: 1px solid var(--gold); }
-.tier-label.tier-platinum { background: rgba(127,232,216,0.15); color: #7fe8d8; border: 1px solid #7fe8d8; }
+/* Animated rating bar */
+.rating-bar-track{margin-top:16px;height:6px;background:var(--input);border-radius:3px;overflow:hidden;animation:fadeIn 0.6s 0.8s both}
+.rating-bar-fill{height:100%;background:linear-gradient(90deg,var(--ember),var(--gold));border-radius:3px;width:0;transition:width 1.2s cubic-bezier(0.34,1.56,0.64,1)}
 
-.profile-info { flex: 1; }
+/* Section */
+.section-label{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;animation:fadeIn 0.6s both}
 
-.profile-name { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+/* Achievements */
+.achievements-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:28px}
+.achievement-card{background:var(--raised);border:1px solid var(--gold);border-radius:14px;padding:14px;text-align:center;animation:achEnter 0.5s cubic-bezier(0.34,1.56,0.64,1) both;position:relative;overflow:hidden;transition:all 0.3s}
+.achievement-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,193,77,0.05),transparent);pointer-events:none}
+.achievement-card:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 8px 24px rgba(255,193,77,0.2)}
+@keyframes achEnter{from{opacity:0;transform:scale(0.8) rotate(-5deg)}to{opacity:1;transform:none}}
+.achievement-card:nth-child(1){animation-delay:0.1s}
+.achievement-card:nth-child(2){animation-delay:0.15s}
+.achievement-card:nth-child(3){animation-delay:0.2s}
+.achievement-card:nth-child(4){animation-delay:0.25s}
+.achievement-icon{font-size:28px;display:block;margin-bottom:6px;animation:iconFloat 3s ease-in-out infinite}
+@keyframes iconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.achievement-name{font-size:12px;font-weight:600;color:var(--gold);margin-bottom:2px}
+.achievement-desc{font-size:10px;color:var(--dim)}
 
-.profile-rating {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 15px;
-    color: var(--gold);
-    margin-bottom: 16px;
-}
+.no-achievements{text-align:center;padding:24px;color:var(--dim);font-size:13px;margin-bottom:28px;border:1px dashed var(--line);border-radius:14px;animation:fadeIn 0.6s both}
 
-.stats { display: flex; gap: 24px; }
+/* Match history */
+.match{background:var(--raised);border:1px solid var(--line);border-radius:13px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;animation:rowEnter 0.5s both;transition:all 0.25s;position:relative;overflow:hidden}
+@keyframes rowEnter{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+.match:nth-child(1){animation-delay:0.1s}
+.match:nth-child(2){animation-delay:0.15s}
+.match:nth-child(3){animation-delay:0.2s}
+.match::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,122,61,0.05),transparent);transform:translateX(-100%);transition:transform 0.3s}
+.match:hover::before{transform:translateX(0)}
+.match:hover{background:var(--input)}
 
-.stat-item { text-align: center; }
+.match-result{font-weight:700;font-size:13px;min-width:90px;font-family:'IBM Plex Mono',monospace}
+.match-result.win{color:var(--ok)}
+.match-result.loss{color:var(--loss)}
+.match-info{flex:1;padding:0 16px}
+.match-task{font-size:14px;color:var(--text)}
+.match-opponent{font-size:12px;color:var(--dim);margin-top:2px}
+.match-opponent a{color:var(--gold);text-decoration:none;transition:color 0.2s}
+.match-opponent a:hover{color:var(--ember)}
+.match-date{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dim)}
 
-.stat-value {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 22px;
-    font-weight: 700;
-}
+.no-matches{text-align:center;padding:32px;color:var(--dim);animation:fadeIn 0.6s both}
+.not-found{text-align:center;padding:70px 20px;color:var(--dim)}
+.not-found h2{font-size:22px;margin-bottom:12px;color:var(--text)}
 
-.stat-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.stat-win .stat-value { color: var(--ok); }
-.stat-loss .stat-value { color: var(--loss); }
-.stat-wr .stat-value { color: var(--gold); }
-
-.rating-bar-track {
-    margin-top: 16px;
-    height: 6px;
-    background: var(--bg-input);
-    border-radius: 3px;
-    overflow: hidden;
-}
-
-.rating-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--ember), var(--gold));
-    border-radius: 3px;
-}
-
-.section-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 16px;
-}
-
-.achievements-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 10px;
-    margin-bottom: 32px;
-}
-
-.achievement-card {
-    background: var(--bg-raised);
-    border: 1px solid var(--gold);
-    border-radius: 12px;
-    padding: 14px;
-    text-align: center;
-}
-
-.achievement-icon { font-size: 28px; display: block; margin-bottom: 6px; }
-.achievement-name { font-size: 13px; font-weight: 600; color: var(--gold); margin-bottom: 2px; }
-.achievement-desc { font-size: 11px; color: var(--text-dim); }
-
-.no-achievements {
-    text-align: center;
-    padding: 24px;
-    color: var(--text-dim);
-    font-size: 13px;
-    margin-bottom: 32px;
-    border: 1px dashed var(--line);
-    border-radius: 12px;
-}
-
-.match {
-    background: var(--bg-raised);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.match-result {
-    font-weight: 700;
-    font-size: 14px;
-    min-width: 90px;
-    font-family: 'IBM Plex Mono', monospace;
-}
-
-.match-result.win { color: var(--ok); }
-.match-result.loss { color: var(--loss); }
-
-.match-info { flex: 1; padding: 0 16px; }
-.match-task { font-size: 14px; color: var(--text); }
-.match-opponent { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-.match-opponent a { color: var(--gold); text-decoration: none; }
-.match-date { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-dim); }
-
-.no-matches { text-align: center; padding: 32px; color: var(--text-dim); }
-.not-found { text-align: center; padding: 70px 20px; color: var(--text-dim); }
-.not-found h2 { font-size: 22px; margin-bottom: 12px; color: var(--text); }
-
-.cta-main {
-    display: inline-block;
-    margin-top: 24px;
-    padding: 14px 28px;
-    background: linear-gradient(135deg, var(--ember), #ff5e3d);
-    color: #1a0f08;
-    border-radius: 14px;
-    font-weight: 700;
-    font-size: 15px;
-    text-decoration: none;
-}
+.cta-main{display:inline-block;margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,var(--ember),#ff5e3d);color:#1a0f08;border-radius:14px;font-weight:700;font-size:15px;text-decoration:none;transition:all 0.25s;position:relative;overflow:hidden}
+.cta-main::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,0.15),transparent);transform:translateX(-100%);transition:transform 0.5s}
+.cta-main:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(255,122,61,0.4)}
+.cta-main:hover::before{transform:translateX(100%)}
 </style>
 </head>
 <body>
+<div class="grid-bg"></div>
+<div class="orb orb1"></div><div class="orb orb2"></div>
+<div class="particles" id="particles"></div>
 
 <div class="header">
-    <a class="logo" href="/"><div class="logo-mark">⚔</div>Code Duel</a>
-    <div class="nav">
-        <a href="/">главная</a>
-        <a href="/leaderboard">рейтинг</a>
-    </div>
+  <a class="logo" href="/"><div class="logo-mark">⚔</div>Code Duel</a>
+  <div class="nav"><a href="/">главная</a><a href="/leaderboard">рейтинг</a></div>
 </div>
 
 <div class="page">
-
 {% if not player %}
 <div class="not-found">
-    <h2>боец «{{ username }}» не найден</h2>
-    <p>возможно, этот игрок ещё не сыграл ни одной дуэли</p>
-    <a class="cta-main" href="/">⚡ начать играть</a>
+  <h2>боец «{{ username }}» не найден</h2>
+  <p>возможно, этот игрок ещё не сыграл ни одной дуэли</p><br>
+  <a class="cta-main" href="/">⚡ начать играть</a>
 </div>
-
 {% else %}
 
 <div class="profile-card">
-    <div class="avatar tier-{{ player.tier }}">{{ player.avatar or '⚔️' }}</div>
-    <div class="profile-info">
-        <div class="profile-name">{{ player.username }}<span class="tier-label tier-{{ player.tier }}">{{ player.tier }}</span></div>
-        <div class="profile-rating">★ {{ player.rating }} рейтинга</div>
-        <div class="stats">
-            <div class="stat-item stat-win">
-                <div class="stat-value">{{ player.wins }}</div>
-                <div class="stat-label">победы</div>
-            </div>
-            <div class="stat-item stat-loss">
-                <div class="stat-value">{{ player.losses }}</div>
-                <div class="stat-label">поражения</div>
-            </div>
-            <div class="stat-item stat-wr">
-                <div class="stat-value">{{ player.winrate }}%</div>
-                <div class="stat-label">винрейт</div>
-            </div>
-        </div>
-        <div class="rating-bar-track">
-            <div class="rating-bar-fill" style="width: {{ [player.rating / 20, 100] | min }}%"></div>
-        </div>
+  <div class="avatar tier-{{ player.tier }}">{{ player.avatar or '⚔️' }}</div>
+  <div class="profile-info">
+    <div class="profile-name">{{ player.username }}<span class="tier-label tier-{{ player.tier }}">{{ player.tier }}</span></div>
+    <div class="profile-rating">★ {{ player.rating }} рейтинга</div>
+    <div class="stats">
+      <div class="stat-item stat-win"><div class="stat-value">{{ player.wins }}</div><div class="stat-label">победы</div></div>
+      <div class="stat-item stat-loss"><div class="stat-value">{{ player.losses }}</div><div class="stat-label">поражения</div></div>
+      <div class="stat-item stat-wr"><div class="stat-value">{{ player.winrate }}%</div><div class="stat-label">винрейт</div></div>
     </div>
+    <div class="rating-bar-track">
+      <div class="rating-bar-fill" id="ratingBar" style="width:0%"></div>
+    </div>
+  </div>
 </div>
 
 <div class="section-label">ачивки ({{ player.achievements | length }})</div>
-
 {% if player.achievements %}
 <div class="achievements-grid">
-    {% for ach in player.achievements %}
-    <div class="achievement-card">
-        <span class="achievement-icon">{{ ach.icon }}</span>
-        <div class="achievement-name">{{ ach.name }}</div>
-        <div class="achievement-desc">{{ ach.desc }}</div>
-    </div>
-    {% endfor %}
+  {% for ach in player.achievements %}
+  <div class="achievement-card">
+    <span class="achievement-icon">{{ ach.icon }}</span>
+    <div class="achievement-name">{{ ach.name }}</div>
+    <div class="achievement-desc">{{ ach.desc }}</div>
+  </div>
+  {% endfor %}
 </div>
 {% else %}
 <div class="no-achievements">пока нет ачивок — сыграй первую дуэль</div>
 {% endif %}
 
 <div class="section-label">последние матчи</div>
-
 {% if matches %}
 {% for match in matches %}
 <div class="match">
-    {% if match.winner == player.username %}
-    <div class="match-result win">🏆 победа</div>
-    <div class="match-info">
-        <div class="match-task">{{ match.task_title }}</div>
-        <div class="match-opponent">vs <a href="/profile/{{ match.loser }}">{{ match.loser }}</a></div>
-    </div>
-    {% else %}
-    <div class="match-result loss">😔 поражение</div>
-    <div class="match-info">
-        <div class="match-task">{{ match.task_title }}</div>
-        <div class="match-opponent">vs <a href="/profile/{{ match.winner }}">{{ match.winner }}</a></div>
-    </div>
-    {% endif %}
-    <div class="match-date">{{ match.played_at.strftime('%d.%m.%Y') }}</div>
+  {% if match.winner == player.username %}
+  <div class="match-result win">🏆 победа</div>
+  <div class="match-info"><div class="match-task">{{ match.task_title }}</div><div class="match-opponent">vs <a href="/profile/{{ match.loser }}">{{ match.loser }}</a></div></div>
+  {% else %}
+  <div class="match-result loss">😔 поражение</div>
+  <div class="match-info"><div class="match-task">{{ match.task_title }}</div><div class="match-opponent">vs <a href="/profile/{{ match.winner }}">{{ match.winner }}</a></div></div>
+  {% endif %}
+  <div class="match-date">{{ match.played_at.strftime('%d.%m.%Y') }}</div>
 </div>
 {% endfor %}
 {% else %}
@@ -343,9 +196,26 @@ body {
 {% endif %}
 
 <a class="cta-main" href="/">⚡ сыграть дуэль</a>
-
 {% endif %}
-
 </div>
+
+<script>
+const pc=document.getElementById('particles');
+for(let i=0;i<20;i++){
+  const d=document.createElement('div');d.className='particle';
+  const s=Math.random()*4+2;
+  const c=['rgba(111,217,140,0.5)','rgba(255,193,77,0.4)','rgba(255,122,61,0.3)'];
+  d.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;background:${c[Math.floor(Math.random()*3)]};animation-duration:${Math.random()*18+12}s;animation-delay:${Math.random()*18}s`;
+  pc.appendChild(d);
+}
+// Animate rating bar
+setTimeout(()=>{
+  const bar=document.getElementById('ratingBar');
+  if(bar){
+    const rating={{ player.rating if player else 0 }};
+    bar.style.width=Math.min(rating/20,100)+'%';
+  }
+},500);
+</script>
 </body>
 </html>

@@ -6,211 +6,119 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d0b09;--card:#181410;--input:#211c17;--line:#2e2820;--text:#f0ebe2;--dim:#7a7268;--ember:#ff7a3d;--gold:#ffc14d;--ok:#6fd98c}
 
-:root {
-    --bg: #14110f;
-    --bg-raised: #1c1815;
-    --bg-input: #221d19;
-    --line: #34302a;
-    --text: #f2ede4;
-    --text-dim: #8a8278;
-    --ember: #ff7a3d;
-    --gold: #ffc14d;
-    --ok: #6fd98c;
-}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:center;overflow:hidden;position:relative}
 
-body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Space Grotesk', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-image:
-        radial-gradient(circle at 15% 20%, rgba(255,122,61,0.05), transparent 40%),
-        radial-gradient(circle at 85% 80%, rgba(255,193,77,0.05), transparent 40%);
-}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(111,217,140,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(111,217,140,0.025) 1px,transparent 1px);background-size:60px 60px;animation:gridPulse 4s ease-in-out infinite;z-index:0}
+@keyframes gridPulse{0%,100%{opacity:0.4}50%{opacity:1}}
 
-.card {
-    width: 380px;
-    background: var(--bg-raised);
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    padding: 40px 36px;
-}
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:orbFloat 8s ease-in-out infinite}
+.orb1{width:350px;height:350px;background:rgba(111,217,140,0.06);top:-80px;right:-80px}
+.orb2{width:280px;height:280px;background:rgba(255,193,77,0.05);bottom:-60px;left:-60px;animation-delay:-3s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(-20px,20px)}}
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 22px;
-    margin-bottom: 6px;
-}
+.particles{position:fixed;inset:0;pointer-events:none;z-index:0}
+.particle{position:absolute;border-radius:50%;animation:float linear infinite;opacity:0}
+@keyframes float{0%{transform:translateY(100vh);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-10vh);opacity:0}}
 
-.logo-mark {
-    width: 30px;
-    height: 30px;
-    background: var(--ember);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--bg);
-}
+.card{position:relative;z-index:1;width:440px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:40px 36px;animation:cardEnter 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;box-shadow:0 0 0 1px rgba(111,217,140,0.05),0 40px 80px rgba(0,0,0,0.5)}
+@keyframes cardEnter{from{opacity:0;transform:translateY(30px) scale(0.95)}to{opacity:1;transform:none}}
 
-.eyebrow {
-    text-align: center;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    color: var(--text-dim);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 32px;
-}
+.card::before{content:'';position:absolute;inset:-1px;border-radius:21px;background:linear-gradient(135deg,rgba(111,217,140,0.2),transparent,rgba(255,193,77,0.15),transparent);z-index:-1;animation:borderRotate 6s linear infinite;background-size:200% 200%}
+@keyframes borderRotate{0%{background-position:0% 0%}100%{background-position:200% 200%}}
 
-.error {
-    background: rgba(255, 122, 61, 0.1);
-    border: 1px solid var(--ember);
-    border-radius: 10px;
-    padding: 10px 14px;
-    color: var(--ember);
-    font-size: 13px;
-    margin-bottom: 18px;
-    text-align: center;
-}
+.logo-wrap{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:6px}
+.logo-mark{width:32px;height:32px;background:var(--ok);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#0c2415;animation:pulse 2s ease-in-out infinite;box-shadow:0 0 20px rgba(111,217,140,0.4)}
+@keyframes pulse{0%,100%{box-shadow:0 0 20px rgba(111,217,140,0.4)}50%{box-shadow:0 0 40px rgba(111,217,140,0.7)}}
+.logo-text{font-weight:700;font-size:22px}
 
-label {
-    display: block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-}
+.eyebrow{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:28px;animation:fadeIn 0.8s 0.2s both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-input {
-    width: 100%;
-    padding: 13px 16px;
-    background: var(--bg-input);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    color: var(--text);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 15px;
-    margin-bottom: 18px;
-    outline: none;
-}
+.error{background:rgba(255,122,61,0.1);border:1px solid var(--ember);border-radius:10px;padding:10px 14px;color:var(--ember);font-size:13px;margin-bottom:16px;text-align:center;animation:shake 0.4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
-input:focus { border-color: var(--ok); }
+label{display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
 
-.avatar-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 8px;
-    margin-bottom: 18px;
-}
+.input-wrap{position:relative;margin-bottom:16px}
+input[type=text],input[type=password]{width:100%;padding:12px 16px;background:var(--input);border:1px solid var(--line);border-radius:12px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:15px;outline:none;transition:all 0.3s}
+input:focus{border-color:var(--ok);box-shadow:0 0 0 3px rgba(111,217,140,0.12);background:#131e16}
 
-.avatar-opt {
-    width: 100%;
-    aspect-ratio: 1;
-    background: var(--bg-input);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    font-size: 20px;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    margin-bottom: 0;
-}
+.avatar-label{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:block}
 
-.avatar-opt:hover { border-color: var(--text-dim); transform: scale(1.05); }
+.avatar-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:18px}
+.avatar-opt{width:100%;aspect-ratio:1;background:var(--input);border:1px solid var(--line);border-radius:10px;font-size:20px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;padding:0;margin:0;position:relative;overflow:hidden}
+.avatar-opt::after{content:'';position:absolute;inset:0;background:rgba(111,217,140,0.1);opacity:0;transition:opacity 0.2s}
+.avatar-opt:hover{border-color:var(--dim);transform:scale(1.08)}
+.avatar-opt:hover::after{opacity:1}
+.avatar-opt.selected{border-color:var(--ok);background:rgba(111,217,140,0.12);box-shadow:0 0 12px rgba(111,217,140,0.3);transform:scale(1.05)}
+.avatar-opt.selected::after{opacity:1}
 
-.avatar-opt.selected {
-    border-color: var(--ok);
-    background: rgba(111, 217, 140, 0.1);
-    box-shadow: 0 0 0 1px var(--ok) inset;
-}
+button[type=submit]{width:100%;padding:14px;background:linear-gradient(135deg,var(--ok),#4cb874);border:none;border-radius:12px;color:#0c2415;font-weight:700;font-size:15px;cursor:pointer;margin-top:4px;transition:all 0.25s;position:relative;overflow:hidden}
+button[type=submit]::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,0.15),transparent);transform:translateX(-100%);transition:transform 0.5s}
+button[type=submit]:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(111,217,140,0.4)}
+button[type=submit]:hover::before{transform:translateX(100%)}
+button[type=submit]:active{transform:translateY(0)}
 
-button {
-    width: 100%;
-    padding: 15px;
-    background: linear-gradient(135deg, var(--ok), #4cb874);
-    border: none;
-    border-radius: 12px;
-    color: #0c2415;
-    font-weight: 700;
-    font-size: 15px;
-    cursor: pointer;
-    margin-top: 6px;
-    transition: transform 0.12s;
-}
-
-button:hover { transform: translateY(-1px); }
-
-.bottom {
-    text-align: center;
-    margin-top: 24px;
-    color: var(--text-dim);
-    font-size: 13px;
-}
-
-.bottom a {
-    color: var(--gold);
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.bottom a:hover { text-decoration: underline; }
+.bottom{text-align:center;margin-top:20px;color:var(--dim);font-size:13px}
+.bottom a{color:var(--gold);text-decoration:none;font-weight:500;transition:color 0.2s}
+.bottom a:hover{color:var(--ember)}
 </style>
 </head>
 <body>
+<div class="grid-bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="particles" id="particles"></div>
+
 <div class="card">
-    <div class="logo"><div class="logo-mark">⚔</div>Code Duel</div>
-    <div class="eyebrow">ranked 1v1 · регистрация</div>
+  <div class="logo-wrap">
+    <div class="logo-mark">⚔</div>
+    <span class="logo-text">Code Duel</span>
+  </div>
+  <div class="eyebrow">ranked 1v1 · регистрация</div>
 
-    {% if error %}
-    <div class="error">{{ error }}</div>
-    {% endif %}
+  {% if error %}
+  <div class="error">{{ error }}</div>
+  {% endif %}
 
-    <form method="POST">
-        <label>никнейм</label>
-        <input type="text" name="username" placeholder="придумай никнейм" autofocus maxlength="20"/>
-
-        <label>пароль</label>
-        <input type="password" name="password" placeholder="придумай пароль"/>
-
-        <label>аватар бойца</label>
-        <div class="avatar-grid" id="avatar-grid">
-            {% for a in avatars %}
-            <button type="button" class="avatar-opt{% if loop.first %} selected{% endif %}" data-avatar="{{ a }}">{{ a }}</button>
-            {% endfor %}
-        </div>
-        <input type="hidden" name="avatar" id="avatar-input" value="{{ avatars[0] }}"/>
-
-        <button type="submit">создать бойца →</button>
-    </form>
-
-    <div class="bottom">
-        уже есть аккаунт? <a href="/login">войти</a>
+  <form method="POST">
+    <label>никнейм</label>
+    <div class="input-wrap">
+      <input type="text" name="username" placeholder="придумай никнейм" autofocus maxlength="20"/>
     </div>
+    <label>пароль</label>
+    <div class="input-wrap">
+      <input type="password" name="password" placeholder="придумай пароль"/>
+    </div>
+    <span class="avatar-label">аватар бойца</span>
+    <div class="avatar-grid" id="avatar-grid">
+      {% for a in avatars %}
+      <button type="button" class="avatar-opt{% if loop.first %} selected{% endif %}" data-avatar="{{ a }}">{{ a }}</button>
+      {% endfor %}
+    </div>
+    <input type="hidden" name="avatar" id="avatar-input" value="{{ avatars[0] }}"/>
+    <button type="submit">создать бойца →</button>
+  </form>
+  <div class="bottom">уже есть аккаунт? <a href="/login">войти</a></div>
 </div>
+
 <script>
-document.querySelectorAll('.avatar-opt').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.avatar-opt').forEach(b => b.classList.remove('selected'));
-        this.classList.add('selected');
-        document.getElementById('avatar-input').value = this.dataset.avatar;
-    });
+const p=document.getElementById('particles');
+for(let i=0;i<20;i++){
+  const d=document.createElement('div');d.className='particle';
+  const s=Math.random()*4+2;
+  d.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;background:${Math.random()>0.5?'rgba(111,217,140,0.6)':'rgba(255,193,77,0.5)'};animation-duration:${Math.random()*15+10}s;animation-delay:${Math.random()*15}s`;
+  p.appendChild(d);
+}
+document.querySelectorAll('.avatar-opt').forEach(b=>{
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.avatar-opt').forEach(x=>x.classList.remove('selected'));
+    this.classList.add('selected');
+    document.getElementById('avatar-input').value=this.dataset.avatar;
+  });
 });
 </script>
 </body>

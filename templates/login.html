@@ -6,164 +6,265 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+*{margin:0;padding:0;box-sizing:border-box}
 
-:root {
-    --bg: #14110f;
-    --bg-raised: #1c1815;
-    --bg-input: #221d19;
-    --line: #34302a;
-    --text: #f2ede4;
-    --text-dim: #8a8278;
-    --ember: #ff7a3d;
-    --gold: #ffc14d;
-    --ok: #6fd98c;
+:root{
+  --bg:#0d0b09;
+  --card:#181410;
+  --input:#211c17;
+  --line:#2e2820;
+  --text:#f0ebe2;
+  --dim:#7a7268;
+  --ember:#ff7a3d;
+  --gold:#ffc14d;
+  --ok:#6fd98c;
 }
 
-body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Space Grotesk', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-image:
-        radial-gradient(circle at 15% 20%, rgba(255,122,61,0.05), transparent 40%),
-        radial-gradient(circle at 85% 80%, rgba(255,193,77,0.05), transparent 40%);
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Space Grotesk',sans-serif;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  position:relative;
 }
 
-.card {
-    width: 380px;
-    background: var(--bg-raised);
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    padding: 40px 36px;
+/* Animated background particles */
+.particles{position:fixed;inset:0;pointer-events:none;z-index:0}
+.particle{
+  position:absolute;
+  border-radius:50%;
+  animation:float linear infinite;
+  opacity:0;
+}
+@keyframes float{
+  0%{transform:translateY(100vh) rotate(0deg);opacity:0}
+  10%{opacity:1}
+  90%{opacity:1}
+  100%{transform:translateY(-10vh) rotate(720deg);opacity:0}
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 22px;
-    margin-bottom: 6px;
+/* Pulsing grid lines */
+.grid-bg{
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(255,122,61,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,122,61,0.03) 1px,transparent 1px);
+  background-size:60px 60px;
+  animation:gridPulse 4s ease-in-out infinite;
+  z-index:0;
+}
+@keyframes gridPulse{
+  0%,100%{opacity:0.5}
+  50%{opacity:1}
 }
 
-.logo-mark {
-    width: 30px;
-    height: 30px;
-    background: var(--ember);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--bg);
+/* Glowing orbs */
+.orb{
+  position:fixed;
+  border-radius:50%;
+  filter:blur(80px);
+  pointer-events:none;
+  z-index:0;
+  animation:orbFloat 8s ease-in-out infinite;
+}
+.orb1{width:400px;height:400px;background:rgba(255,122,61,0.06);top:-100px;left:-100px}
+.orb2{width:300px;height:300px;background:rgba(255,193,77,0.05);bottom:-50px;right:-50px;animation-delay:-4s}
+@keyframes orbFloat{
+  0%,100%{transform:translate(0,0) scale(1)}
+  50%{transform:translate(30px,-20px) scale(1.1)}
 }
 
-.eyebrow {
-    text-align: center;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    color: var(--text-dim);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 32px;
+.card{
+  position:relative;
+  z-index:1;
+  width:400px;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:44px 38px;
+  animation:cardEnter 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  box-shadow:0 0 0 1px rgba(255,122,61,0.05),0 40px 80px rgba(0,0,0,0.5);
+}
+@keyframes cardEnter{
+  from{opacity:0;transform:translateY(30px) scale(0.95)}
+  to{opacity:1;transform:translateY(0) scale(1)}
 }
 
-.error {
-    background: rgba(255, 122, 61, 0.1);
-    border: 1px solid var(--ember);
-    border-radius: 10px;
-    padding: 10px 14px;
-    color: var(--ember);
-    font-size: 13px;
-    margin-bottom: 18px;
-    text-align: center;
+/* Animated border on card */
+.card::before{
+  content:'';
+  position:absolute;
+  inset:-1px;
+  border-radius:21px;
+  background:linear-gradient(135deg,rgba(255,122,61,0.3),transparent,rgba(255,193,77,0.2),transparent);
+  z-index:-1;
+  animation:borderRotate 6s linear infinite;
+  background-size:200% 200%;
+}
+@keyframes borderRotate{
+  0%{background-position:0% 0%}
+  100%{background-position:200% 200%}
 }
 
-label {
-    display: block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
+.logo-wrap{
+  display:flex;align-items:center;gap:12px;
+  justify-content:center;margin-bottom:6px;
 }
 
-input {
-    width: 100%;
-    padding: 13px 16px;
-    background: var(--bg-input);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    color: var(--text);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 15px;
-    margin-bottom: 18px;
-    outline: none;
+.logo-mark{
+  width:32px;height:32px;
+  background:var(--ember);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:700;color:var(--bg);
+  animation:pulse 2s ease-in-out infinite;
+  box-shadow:0 0 20px rgba(255,122,61,0.4);
+}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 20px rgba(255,122,61,0.4)}
+  50%{box-shadow:0 0 40px rgba(255,122,61,0.7)}
 }
 
-input:focus { border-color: var(--ember); }
+.logo-text{font-weight:700;font-size:22px}
 
-button {
-    width: 100%;
-    padding: 15px;
-    background: linear-gradient(135deg, var(--ember), #ff5e3d);
-    border: none;
-    border-radius: 12px;
-    color: #1a0f08;
-    font-weight: 700;
-    font-size: 15px;
-    cursor: pointer;
-    margin-top: 6px;
-    transition: transform 0.12s;
+.eyebrow{
+  text-align:center;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;color:var(--dim);
+  letter-spacing:2px;text-transform:uppercase;
+  margin-bottom:32px;
+  animation:fadeIn 0.8s 0.2s both;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.error{
+  background:rgba(255,122,61,0.1);
+  border:1px solid var(--ember);
+  border-radius:10px;
+  padding:10px 14px;color:var(--ember);
+  font-size:13px;margin-bottom:18px;text-align:center;
+  animation:shake 0.4s ease;
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  75%{transform:translateX(6px)}
 }
 
-button:hover { transform: translateY(-1px); }
-
-.bottom {
-    text-align: center;
-    margin-top: 24px;
-    color: var(--text-dim);
-    font-size: 13px;
+label{
+  display:block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;color:var(--dim);
+  text-transform:uppercase;letter-spacing:1px;
+  margin-bottom:8px;
+  animation:fadeIn 0.6s both;
 }
 
-.bottom a {
-    color: var(--gold);
-    text-decoration: none;
-    font-weight: 500;
+.input-wrap{position:relative;margin-bottom:18px}
+
+input{
+  width:100%;
+  padding:13px 16px;
+  background:var(--input);
+  border:1px solid var(--line);
+  border-radius:12px;
+  color:var(--text);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:15px;
+  outline:none;
+  transition:all 0.3s;
+}
+input:focus{
+  border-color:var(--ember);
+  box-shadow:0 0 0 3px rgba(255,122,61,0.12),0 0 20px rgba(255,122,61,0.08);
+  background:#261f18;
 }
 
-.bottom a:hover { text-decoration: underline; }
+/* Animated label slide on focus */
+.input-wrap:focus-within::after{
+  content:'';
+  position:absolute;
+  bottom:0;left:20%;right:20%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--ember),transparent);
+  animation:lineSlide 0.4s ease;
+}
+@keyframes lineSlide{from{left:50%;right:50%;opacity:0}to{left:20%;right:20%;opacity:1}}
+
+button{
+  width:100%;padding:15px;
+  background:linear-gradient(135deg,var(--ember),#ff5e3d);
+  border:none;border-radius:12px;
+  color:#1a0f08;font-weight:700;font-size:15px;
+  cursor:pointer;margin-top:6px;
+  transition:all 0.25s;
+  position:relative;overflow:hidden;
+}
+button::before{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent,rgba(255,255,255,0.15),transparent);
+  transform:translateX(-100%);
+  transition:transform 0.5s;
+}
+button:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(255,122,61,0.4)}
+button:hover::before{transform:translateX(100%)}
+button:active{transform:translateY(0)}
+
+.bottom{
+  text-align:center;margin-top:24px;
+  color:var(--dim);font-size:13px;
+  animation:fadeIn 0.8s 0.5s both;
+}
+.bottom a{color:var(--gold);text-decoration:none;font-weight:500;transition:color 0.2s}
+.bottom a:hover{color:var(--ember)}
 </style>
 </head>
 <body>
+<div class="grid-bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="particles" id="particles"></div>
+
 <div class="card">
-    <div class="logo"><div class="logo-mark">⚔</div>Code Duel</div>
-    <div class="eyebrow">ranked 1v1 · вход в систему</div>
+  <div class="logo-wrap">
+    <div class="logo-mark">⚔</div>
+    <span class="logo-text">Code Duel</span>
+  </div>
+  <div class="eyebrow">ranked 1v1 · вход в систему</div>
 
-    {% if error %}
-    <div class="error">{{ error }}</div>
-    {% endif %}
+  {% if error %}
+  <div class="error">{{ error }}</div>
+  {% endif %}
 
-    <form method="POST">
-        <label>никнейм</label>
-        <input type="text" name="username" placeholder="введи никнейм" autofocus/>
-
-        <label>пароль</label>
-        <input type="password" name="password" placeholder="введи пароль"/>
-
-        <button type="submit">войти в бой →</button>
-    </form>
-
-    <div class="bottom">
-        нет аккаунта? <a href="/register">создать</a>
+  <form method="POST">
+    <label>никнейм</label>
+    <div class="input-wrap">
+      <input type="text" name="username" placeholder="введи никнейм" autofocus/>
     </div>
+    <label>пароль</label>
+    <div class="input-wrap">
+      <input type="password" name="password" placeholder="введи пароль"/>
+    </div>
+    <button type="submit">войти в бой →</button>
+  </form>
+
+  <div class="bottom">нет аккаунта? <a href="/register">создать</a></div>
 </div>
+
+<script>
+const p=document.getElementById('particles');
+for(let i=0;i<25;i++){
+  const d=document.createElement('div');
+  d.className='particle';
+  const s=Math.random()*4+2;
+  d.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;background:${Math.random()>0.5?'rgba(255,122,61,0.6)':'rgba(255,193,77,0.5)'};animation-duration:${Math.random()*15+10}s;animation-delay:${Math.random()*15}s`;
+  p.appendChild(d);
+}
+</script>
 </body>
 </html>
